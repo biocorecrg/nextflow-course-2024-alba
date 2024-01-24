@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3 Containers &mdash; Nextflow Course 2023 Fall  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+    <link rel="canonical" href="https://biocorecrg.github.io/nextflow-course-2023-fall/containers.html" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="3 Nextflow" href="nextflow_3.html" />
+    <link rel="prev" title="2 Nextflow" href="nextflow_2.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Nextflow Course 2023 Fall
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="about.html">About the course</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nextflow_1.html">1 Nextflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nextflow_2.html">2 Nextflow</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">3 Containers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#linux-containers">Linux containers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-are-containers">What are containers?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#virtual-machines-or-containers">Virtual machines or containers ?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#virtual-machines-vs-containers">Virtual machines vs containers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#docker">Docker</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-is-docker">What is Docker?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#docker-components">Docker components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#images-versus-containers">Images versus containers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#docker-vocabulary">Docker vocabulary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-existing-images">Using existing images</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#explore-docker-hub">Explore Docker hub</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#docker-pull-import-image">docker pull: import image</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biocontainers">Biocontainers</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#docker-images-list-images">docker images: list images</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#docker-run-run-image-i-e-start-a-container">docker run: run image, i.e. start a container</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#docker-ps-check-containers-status">docker ps: check containers status</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#docker-rm-docker-rmi-clean-up">docker rm, docker rmi: clean up!</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#volumes">Volumes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#major-clean">Major clean</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Volumes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#singularity">Singularity</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#singularity-architecture">Singularity architecture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#container-registries">Container registries</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#docker-hub">Docker hub</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2">Biocontainers</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#running-and-executing-containers">Running and executing containers</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#singularity-shell">Singularity shell</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#singularity-exec">Singularity exec</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#environment-control">Environment control</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#exercise">Exercise</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="nextflow_3.html">3 Nextflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nextflow_4.html">4 Nextflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nextflow_5.html">5 Nextflow</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Nextflow Course 2023 Fall</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">3 Containers</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/containers.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="containers">
+<span id="containers-page"></span><h1>3 Containers<a class="headerlink" href="#containers" title="Link to this heading"></a></h1>
+<section id="linux-containers">
+<h2>Linux containers<a class="headerlink" href="#linux-containers" title="Link to this heading"></a></h2>
+<section id="what-are-containers">
+<h3>What are containers?<a class="headerlink" href="#what-are-containers" title="Link to this heading"></a></h3>
+<a class="reference internal image-reference" href="https://www.synopsys.com/blogs/software-security/wp-content/uploads/2018/04/containers-rsa.jpg"><img alt="https://www.synopsys.com/blogs/software-security/wp-content/uploads/2018/04/containers-rsa.jpg" src="https://www.synopsys.com/blogs/software-security/wp-content/uploads/2018/04/containers-rsa.jpg" style="width: 700px;" /></a>
+<p>A Container can be seen as a <strong>minimal virtual environment</strong> that can be used in any Linux-compatible machine (and beyond).</p>
+<p>Using containers is time- and resource-saving as they allow:</p>
+<ul class="simple">
+<li><p>Controlling for software installation and dependencies.</p></li>
+<li><p>Reproducibility of the analysis.</p></li>
+</ul>
+<p>Containers allow us to use <strong>exactly the same versions of the tools</strong>.</p>
+</section>
+<section id="virtual-machines-or-containers">
+<h3>Virtual machines or containers ?<a class="headerlink" href="#virtual-machines-or-containers" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Virtualisation</p></th>
+<th class="head"><p>Containerisation (aka lightweight virtualisation)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Abstraction of physical hardware</p></td>
+<td><p>Abstraction of application layer</p></td>
+</tr>
+<tr class="row-odd"><td><p>Depends on hypervisor (software)</p></td>
+<td><p>Depends on host kernel (OS)</p></td>
+</tr>
+<tr class="row-even"><td><p>Do not confuse with hardware emulator</p></td>
+<td><p>Application and dependencies bundled all together</p></td>
+</tr>
+<tr class="row-odd"><td><p>Enable virtual machines</p></td>
+<td><p>Every virtual machine with an OS (Operating System)</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="virtual-machines-vs-containers">
+<h3>Virtual machines vs containers<a class="headerlink" href="#virtual-machines-vs-containers" title="Link to this heading"></a></h3>
+<a class="reference internal image-reference" href="https://raw.githubusercontent.com/collabnix/dockerlabs/master/beginners/docker/images/vm-docker5.png"><img alt="https://raw.githubusercontent.com/collabnix/dockerlabs/master/beginners/docker/images/vm-docker5.png" src="https://raw.githubusercontent.com/collabnix/dockerlabs/master/beginners/docker/images/vm-docker5.png" style="width: 800px;" /></a>
+<p><a class="reference external" href="https://dockerlabs.collabnix.com/beginners/difference-docker-vm.html">Source</a></p>
+<p><strong>Pros and cons</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>ADV</p></th>
+<th class="head"><p>Virtualisation</p></th>
+<th class="head"><p>Containerisation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>PROS.</p></td>
+<td><ul class="simple">
+<li><p>Very similar to a full OS.</p></li>
+<li><p>High OS diversity</p></li>
+</ul>
+</td>
+<td><ul class="simple">
+<li><p>No need of full OS installation (less space).</p></li>
+<li><p>Better portability</p></li>
+<li><p>Faster than virtual machines.</p></li>
+<li><p>Easier automation.</p></li>
+<li><p>Easier distribution of recipes.</p></li>
+<li><p>Better portability.</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>CONS.</p></td>
+<td><ul class="simple">
+<li><p>Need more space and resources.</p></li>
+<li><p>Slower than containers.</p></li>
+<li><p>Not that good automation.</p></li>
+</ul>
+</td>
+<td><ul class="simple">
+<li><p>Some cases might not be exactly the same as a full OS.</p></li>
+<li><p>Still less OS diversity, even with current solutions</p></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="docker">
+<h2>Docker<a class="headerlink" href="#docker" title="Link to this heading"></a></h2>
+<section id="what-is-docker">
+<h3>What is Docker?<a class="headerlink" href="#what-is-docker" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Platform for developing, shipping and running applications.</p></li>
+<li><p>Infrastructure as application / code.</p></li>
+<li><p>First version: 2013.</p></li>
+<li><p>Company: originally dotCloud (2010), later named Docker.</p></li>
+<li><p>Established <a class="reference external" href="https://www.opencontainers.org/">Open Container Initiative</a>.</p></li>
+</ul>
+<p>As a software:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.docker.com/products/container-runtime">Docker Community Edition</a>.</p></li>
+<li><p>Docker Enterprise Edition.</p></li>
+</ul>
+<p>There is an increasing number of alternative container technologies and providers. Many of them are actually based on software components originally from the Docker stack and they normally try to address some specific use cases or weakpoints. As a example, <strong>Singularity</strong>, that we introduce later in this couse, is focused in HPC environments. Another case, <strong>Podman</strong>, keeps a high functional compatibility with Docker but with a different focus on technology (not keeping a daemon) and permissions.</p>
+</section>
+<section id="docker-components">
+<h3>Docker components<a class="headerlink" href="#docker-components" title="Link to this heading"></a></h3>
+<a class="reference internal image-reference" href="http://apachebooster.com/kb/wp-content/uploads/2017/09/docker-architecture.png"><img alt="http://apachebooster.com/kb/wp-content/uploads/2017/09/docker-architecture.png" src="http://apachebooster.com/kb/wp-content/uploads/2017/09/docker-architecture.png" style="width: 700px;" /></a>
+<ul class="simple">
+<li><p>Read-only templates.</p></li>
+<li><p>Containers are run from them.</p></li>
+<li><p>Images are not run.</p></li>
+<li><p>Images have several layers.</p></li>
+</ul>
+<a class="reference internal image-reference" href="https://i.stack.imgur.com/vGuay.png"><img alt="https://i.stack.imgur.com/vGuay.png" src="https://i.stack.imgur.com/vGuay.png" style="width: 700px;" /></a>
+</section>
+<section id="images-versus-containers">
+<h3>Images versus containers<a class="headerlink" href="#images-versus-containers" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Image</strong>: A set of layers, read-only templates, inert.</p></li>
+<li><p>An instance of an image is called a <strong>container</strong>.</p></li>
+</ul>
+<p>When you start an image, you have a running container of this image. You can have many running containers of the same image.</p>
+<p><em>“The image is the recipe, the container is the cake; you can make as many cakes as you like with a given recipe.”</em></p>
+<p><a class="reference external" href="https://stackoverflow.com/questions/23735149/what-is-the-difference-between-a-docker-image-and-a-container">https://stackoverflow.com/questions/23735149/what-is-the-difference-between-a-docker-image-and-a-container</a></p>
+</section>
+<section id="docker-vocabulary">
+<h3>Docker vocabulary<a class="headerlink" href="#docker-vocabulary" title="Link to this heading"></a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/docker_vocab.png"><img alt="_images/docker_vocab.png" src="_images/docker_vocab.png" style="width: 550px;" /></a>
+<p>Get help:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker run --help</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/docker_run_help.png"><img alt="_images/docker_run_help.png" src="_images/docker_run_help.png" style="width: 550px;" /></a>
+</section>
+<section id="using-existing-images">
+<h3>Using existing images<a class="headerlink" href="#using-existing-images" title="Link to this heading"></a></h3>
+<section id="explore-docker-hub">
+<h4>Explore Docker hub<a class="headerlink" href="#explore-docker-hub" title="Link to this heading"></a></h4>
+<p>Images can be stored locally or shared in a registry.</p>
+<p><a class="reference external" href="https://hub.docker.com/">Docker hub</a> is the main public registry for Docker images.</p>
+<p>Let’s search the keyword <strong>ubuntu</strong>:</p>
+<a class="reference internal image-reference" href="_images/dockerhub_ubuntu.png"><img alt="_images/dockerhub_ubuntu.png" src="_images/dockerhub_ubuntu.png" style="width: 900px;" /></a>
+</section>
+<section id="docker-pull-import-image">
+<h4>docker pull: import image<a class="headerlink" href="#docker-pull-import-image" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p>get latest image / latest release</p></li>
+</ul>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker pull ubuntu</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/docker_pull.png"><img alt="_images/docker_pull.png" src="_images/docker_pull.png" style="width: 650px;" /></a>
+<ul class="simple">
+<li><p>choose the version of Ubuntu you are fetching: check the different tags</p></li>
+</ul>
+<a class="reference internal image-reference" href="_images/dockerhub_ubuntu_1804.png"><img alt="_images/dockerhub_ubuntu_1804.png" src="_images/dockerhub_ubuntu_1804.png" style="width: 850px;" /></a>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker pull ubuntu:22.04</span>
+</pre></div>
+</div>
+</section>
+<section id="biocontainers">
+<h4>Biocontainers<a class="headerlink" href="#biocontainers" title="Link to this heading"></a></h4>
+<p><a class="reference external" href="https://biocontainers.pro/">https://biocontainers.pro/</a></p>
+<p>Specific directory of Bioinformatics related entries</p>
+<ul class="simple">
+<li><p>Entries in <a class="reference external" href="https://hub.docker.com/u/biocontainers">Docker hub</a> and/or <a class="reference external" href="https://quay.io">Quay.io</a> (RedHat registry)</p></li>
+<li><p>Normally created from <a class="reference external" href="https://bioconda.github.io">Bioconda</a></p></li>
+</ul>
+<p>Example: <strong>FastQC</strong></p>
+<p><a class="reference external" href="https://biocontainers.pro/#/tools/fastqc">https://biocontainers.pro/#/tools/fastqc</a></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker pull biocontainers/fastqc:v0.11.9_cv7</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="docker-images-list-images">
+<h3>docker images: list images<a class="headerlink" href="#docker-images-list-images" title="Link to this heading"></a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker images</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/docker_images_list.png"><img alt="_images/docker_images_list.png" src="_images/docker_images_list.png" style="width: 650px;" /></a>
+<p>Each image has a unique <strong>IMAGE ID</strong>.</p>
+</section>
+<section id="docker-run-run-image-i-e-start-a-container">
+<h3>docker run: run image, i.e. start a container<a class="headerlink" href="#docker-run-run-image-i-e-start-a-container" title="Link to this heading"></a></h3>
+<p>Now we want to use what is <strong>inside</strong> the image.</p>
+<p><strong>docker run</strong> creates a fresh container (active instance of the image) from a <strong>Docker (static) image</strong>, and runs it.</p>
+<p>The format is:</p>
+<p>docker run image:tag <strong>command</strong></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker run ubuntu:22.04 /bin/ls</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/docker_run_ls.png"><img alt="_images/docker_run_ls.png" src="_images/docker_run_ls.png" style="width: 200px;" /></a>
+<p>Now execute <strong>ls</strong> in your current working directory: is the result the same?</p>
+<p>You can execute any program/command that is stored inside the image:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker run ubuntu:22.04 /bin/whoami</span>
+<span class="go">docker run ubuntu:22.04 cat /etc/issue</span>
+</pre></div>
+</div>
+<p>You can either execute programs in the image from the command line (see above) or <strong>execute a container interactively</strong>, i.e. <strong>“enter”</strong> the container.</p>
+<p>With <strong>--name</strong> you can provide a name to the container.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker run -it ubuntu:22.04 /bin/bash</span>
+
+<span class="go">docker run --name myubuntu -it ubuntu:22.04 /bin/bash</span>
+</pre></div>
+</div>
+</section>
+<section id="docker-ps-check-containers-status">
+<h3>docker ps: check containers status<a class="headerlink" href="#docker-ps-check-containers-status" title="Link to this heading"></a></h3>
+<p>List running containers:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker ps</span>
+</pre></div>
+</div>
+<p>List all containers (whether they are running or not):</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker ps -a</span>
+</pre></div>
+</div>
+</section>
+<section id="docker-rm-docker-rmi-clean-up">
+<h3>docker rm, docker rmi: clean up!<a class="headerlink" href="#docker-rm-docker-rmi-clean-up" title="Link to this heading"></a></h3>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker rm myubuntu</span>
+<span class="go">docker rm -f myubuntu</span>
+</pre></div>
+</div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker rmi ubuntu:22.04</span>
+</pre></div>
+</div>
+</section>
+<section id="volumes">
+<h3>Volumes<a class="headerlink" href="#volumes" title="Link to this heading"></a></h3>
+<p>Docker containers are fully isolated. It is necessary to mount volumes in order to handle input/output files.</p>
+<p>Syntax: <strong>--volume/-v</strong> <em>host:container</em></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">mkdir data</span>
+<span class="gp"># </span>We<span class="w"> </span>can<span class="w"> </span>also<span class="w"> </span>copy<span class="w"> </span>the<span class="w"> </span>FASTQ<span class="w"> </span>we<span class="w"> </span>used<span class="w"> </span><span class="k">in</span><span class="w"> </span>data
+<span class="go">docker run --volume $(pwd)/data:/scratch --name fastqc_container biocontainers/fastqc:v0.11.9_cv7 fastqc /scratch/B7_input_s_chr19.fastq.gz</span>
+</pre></div>
+</div>
+<section id="major-clean">
+<h4>Major clean<a class="headerlink" href="#major-clean" title="Link to this heading"></a></h4>
+<p>Check used space</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker system df</span>
+</pre></div>
+</div>
+<p>Remove unused containers (and others) - <strong>DO WITH CARE</strong></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker system prune</span>
+</pre></div>
+</div>
+<p>Remove ALL non-running containers, images, etc. - <strong>DO WITH MUCH MORE CARE!!!</strong></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker system prune -a</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Reference: <a class="reference external" href="https://www.digitalocean.com/community/tutorials/how-to-remove-docker-images-containers-and-volumes">https://www.digitalocean.com/community/tutorials/how-to-remove-docker-images-containers-and-volumes</a></p></li>
+</ul>
+</section>
+</section>
+<section id="id1">
+<h3>Volumes<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<p>Docker containers are fully isolated. It is necessary to mount volumes in order to handle input/output files.</p>
+<p>Syntax: <strong>--volume/-v</strong> <em>host:container</em></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">mkdir data</span>
+<span class="gp"># </span>We<span class="w"> </span>can<span class="w"> </span>copy<span class="w"> </span>some<span class="w"> </span>FASTQ<span class="w"> </span><span class="k">in</span><span class="w"> </span>data
+<span class="go">docker run --volume $(pwd)/data:/scratch --name fastqc_container biocontainers/fastqc:v0.11.9_cv7 fastqc /scratch/B7_input_s_chr19.fastq.gz</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="singularity">
+<h2>Singularity<a class="headerlink" href="#singularity" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Focus:</dt><dd><ul>
+<li><p>Reproducibility to scientific computing and the high-performance computing (HPC) world.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Origin: Lawrence Berkeley National Laboratory. Later spin-off: Sylabs</p></li>
+<li><p>Version 1.0 -&gt; 2016</p></li>
+<li><p>More information: <a class="reference external" href="https://en.wikipedia.org/wiki/Singularity_(software)">https://en.wikipedia.org/wiki/Singularity_(software)</a></p></li>
+</ul>
+<section id="singularity-architecture">
+<h3>Singularity architecture<a class="headerlink" href="#singularity-architecture" title="Link to this heading"></a></h3>
+<a class="reference internal image-reference" href="_images/singularity_architecture.png"><img alt="_images/singularity_architecture.png" src="_images/singularity_architecture.png" style="width: 800px;" /></a>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Strengths</p></th>
+<th class="head"><p>Weaknesses</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>No dependency of a daemon</p></td>
+<td><p>At the time of writing only good support in Linux</p></td>
+</tr>
+<tr class="row-odd"><td><p>Can be run as a simple user</p></td>
+<td><p>Mac experimental. Desktop edition. Only running</p></td>
+</tr>
+<tr class="row-even"><td><p>Avoids permission headaches and hacks</p></td>
+<td><p>For some features you need root account (or sudo)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Image/container is a file (or directory)</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>More easily portable</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Two types of images: Read-only (production)</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>Writable (development, via sandbox)</p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Trivia</strong></p>
+<p>Nowadays, there may be some confusion since there are two projects:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/apptainer/singularity">Apptainer Singularity</a></p></li>
+<li><p><a class="reference external" href="https://sylabs.io/singularity/">Sylabs Singularity</a></p></li>
+</ul>
+<p>They “forked” in 2021. So far they share most of the codebase, but eventually this could be different, and software might have different functionality.</p>
+<p>The former is already “End Of Life” and its development continues named as <a class="reference external" href="http://apptainer.org/">Apptainer</a>, under the support of the Linux Foundation.</p>
+</section>
+<section id="container-registries">
+<h3>Container registries<a class="headerlink" href="#container-registries" title="Link to this heading"></a></h3>
+<p>Container images, normally different versions of them, are stored in container repositories.</p>
+<p>These repositories can be browser or discovered within, normally public, container registries.</p>
+<section id="docker-hub">
+<h4>Docker hub<a class="headerlink" href="#docker-hub" title="Link to this heading"></a></h4>
+<p>It is the first and most popular public container registry (which provides also private repositories).</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://hub.docker.com">Docker Hub</a></p></li>
+</ul>
+<p>Example:</p>
+<p><a class="reference external" href="https://hub.docker.com/r/biocontainers/fastqc">https://hub.docker.com/r/biocontainers/fastqc</a></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">singularity build fastqc-0.11.9_cv7.sif docker://biocontainers/fastqc:v0.11.9_cv7</span>
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h4>Biocontainers<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><a class="reference external" href="https://biocontainers.pro">Biocontainers</a></p></li>
+</ul>
+<p>Website gathering Bioinformatics focused container images from different registries.</p>
+<p>Originally Docker Hub was used, but now other registries are preferred.</p>
+<p>Example: <a class="reference external" href="https://biocontainers.pro/tools/fastqc">https://biocontainers.pro/tools/fastqc</a></p>
+<p><strong>Via quay.io</strong></p>
+<p><a class="reference external" href="https://quay.io/repository/biocontainers/fastqc">https://quay.io/repository/biocontainers/fastqc</a></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">singularity build fastqc-0.11.9.sif docker://quay.io/biocontainers/fastqc:0.11.9--0</span>
+</pre></div>
+</div>
+<p><strong>Via Galaxy project prebuilt images</strong></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">singularity pull --name fastqc-0.11.9.sif https://depot.galaxyproject.org/singularity/fastqc:0.11.9--0</span>
+</pre></div>
+</div>
+<p>Galaxy project provides all Bioinformatics software from the BioContainers initiative as Singularity prebuilt images. If download and conversion time of images is an issue, this might be the best option for those working in the biomedical field.</p>
+<p>Link: <a class="reference external" href="https://depot.galaxyproject.org/singularity/">https://depot.galaxyproject.org/singularity/</a></p>
+</section>
+</section>
+<section id="running-and-executing-containers">
+<h3>Running and executing containers<a class="headerlink" href="#running-and-executing-containers" title="Link to this heading"></a></h3>
+<p>Once we have some image files (or directories) ready, we can run processes.</p>
+<section id="singularity-shell">
+<h4>Singularity shell<a class="headerlink" href="#singularity-shell" title="Link to this heading"></a></h4>
+<p>The straight-forward exploratory approach is equivalent to <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">run</span> <span class="pre">-ti</span> <span class="pre">biocontainers/fastqc:v0.11.9_cv7</span> <span class="pre">/bin/sh</span></code> but with a more handy syntax.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">singularity shell fastqc-0.11.9.sif</span>
+</pre></div>
+</div>
+<p>Move around the directories and notice how the isolation approach is different in comparison to Docker. You can access most of the host filesystem.</p>
+</section>
+<section id="singularity-exec">
+<h4>Singularity exec<a class="headerlink" href="#singularity-exec" title="Link to this heading"></a></h4>
+<p>That is the most common way to execute Singularity (equivalent to <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">exec</span></code>). That would be the normal approach in a HPC environment.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">singularity exec fastqc-0.11.9.sif fastqc</span>
+</pre></div>
+</div>
+<p>a processing of a FASTQ file from <em>data</em> directory:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">singularity exec fastqc-0.11.9_cv7.sif fastqc B7_input_s_chr19.fastq.gz</span>
+</pre></div>
+</div>
+</section>
+<section id="environment-control">
+<h4>Environment control<a class="headerlink" href="#environment-control" title="Link to this heading"></a></h4>
+<p>By default Singularity inherits a profile environment (e.g., PATH environment variable). This may be convenient in some circumstances, but it can also lead to unexpected problems when your own environment clashes with the default one from the image.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">singularity shell -e fastqc-0.11.9.sif</span>
+<span class="go">singularity exec -e fastqc-0.11.9.sif fastqc</span>
+</pre></div>
+</div>
+<p>Compare <code class="docutils literal notranslate"><span class="pre">env</span></code> command with and without -e modifier.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">singularity exec fastqc-0.11.9.sif env</span>
+<span class="go">singularity exec -e fastqc-0.11.9.sif env</span>
+</pre></div>
+</div>
+</section>
+<section id="exercise">
+<h4>Exercise<a class="headerlink" href="#exercise" title="Link to this heading"></a></h4>
+<p>Using the 2 fastq available files, process them using fastqc.</p>
+<details>
+<summary><a>Suggested solution</a></summary><div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp"># </span>Let<span class="err">&#39;</span>s<span class="w"> </span>create<span class="w"> </span>a<span class="w"> </span>dummy<span class="w"> </span>directory
+<span class="go">mkdir data</span>
+
+<span class="gp"># </span>Let<span class="err">&#39;</span>s<span class="w"> </span>copy<span class="w"> </span>contents<span class="w"> </span>FASTQC<span class="w"> </span>files<span class="w"> </span><span class="k">in</span><span class="w"> </span>data<span class="w"> </span>directory
+
+<span class="go">singularity exec fastqc.sif fastqc data/*fastq.gz</span>
+
+<span class="gp"># </span>Check<span class="w"> </span>you<span class="w"> </span>have<span class="w"> </span>some<span class="w"> </span>HTMLs<span class="w"> </span>there.<span class="w"> </span>Remove<span class="w"> </span>them
+<span class="go">rm data/*html</span>
+
+<span class="gp"># </span>Let<span class="err">&#39;</span>s<span class="w"> </span>use<span class="w"> </span>shell
+<span class="go">singularity shell fastqc.sif</span>
+<span class="go">&gt; cd data</span>
+<span class="go">&gt; fastqc *fastq.gz</span>
+<span class="go">&gt; exit</span>
+</pre></div>
+</div>
+</details></section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="nextflow_2.html" class="btn btn-neutral float-left" title="2 Nextflow" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="nextflow_3.html" class="btn btn-neutral float-right" title="3 Nextflow" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
