@@ -72,18 +72,18 @@
 <li class="toctree-l3"><a class="reference internal" href="#docker-run-run-image-i-e-start-a-container">docker run: run image, i.e. start a container</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#docker-ps-check-containers-status">docker ps: check containers status</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#docker-rm-docker-rmi-clean-up">docker rm, docker rmi: clean up!</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#additional-docker-commands">Additional docker commands</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#volumes">Volumes</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#major-clean">Major clean</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#id1">Volumes</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#singularity">Singularity</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#singularity-architecture">Singularity architecture</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#container-registries">Container registries</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#docker-hub">Docker hub</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id2">Biocontainers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">Biocontainers</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#running-and-executing-containers">Running and executing containers</a><ul>
@@ -227,7 +227,7 @@
 <li><p><a class="reference external" href="https://www.docker.com/products/container-runtime">Docker Community Edition</a>.</p></li>
 <li><p>Docker Enterprise Edition.</p></li>
 </ul>
-<p>There is an increasing number of alternative container technologies and providers. Many of them are actually based on software components originally from the Docker stack and they normally try to address some specific use cases or weakpoints. As a example, <strong>Singularity</strong>, that we introduce later in this couse, is focused in HPC environments. Another case, <strong>Podman</strong>, keeps a high functional compatibility with Docker but with a different focus on technology (not keeping a daemon) and permissions.</p>
+<p>There is an increasing number of alternative container technologies and providers. Many of them are actually based on software components originally from the Docker stack, and they normally try to address some specific use cases or weakpoints. As an example, <strong>Singularity</strong>, that we introduce later in this course, is focused on HPC environments. Another case, <strong>Podman</strong>, keeps a high functional compatibility with Docker but with a different focus on technology (not keeping a daemon) and permissions.</p>
 </section>
 <section id="docker-components">
 <h3>Docker components<a class="headerlink" href="#docker-components" title="Link to this heading"></a></h3>
@@ -356,6 +356,21 @@
 </pre></div>
 </div>
 </section>
+<section id="additional-docker-commands">
+<h3>Additional docker commands<a class="headerlink" href="#additional-docker-commands" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><cite>docker commit</cite>: Turn a container into an image</p></li>
+<li><p><cite>docker tag</cite>: Tag an image</p></li>
+<li><p><cite>docker save</cite>: Save an image to a tar archive</p></li>
+<li><p><cite>docker load</cite>: Load an image from a tar archive</p></li>
+<li><p><cite>docker export</cite>: Export a container’s filesystem as a tar archive (little used)</p></li>
+<li><p><cite>docker import</cite>: Import the contents from a tarball to create a filesystem image (little used)</p></li>
+</ul>
+<p>Recommend workflow: If necessary, commit a Docker container into an image and then save it into a tar archive that can be shared and loaded in another machine.</p>
+<ul class="simple">
+<li><p>Reference: <a class="reference external" href="https://www.baeldung.com/ops/docker-save-export">https://www.baeldung.com/ops/docker-save-export</a></p></li>
+</ul>
+</section>
 <section id="volumes">
 <h3>Volumes<a class="headerlink" href="#volumes" title="Link to this heading"></a></h3>
 <p>Docker containers are fully isolated. It is necessary to mount volumes in order to handle input/output files.</p>
@@ -384,16 +399,6 @@
 </ul>
 </section>
 </section>
-<section id="id1">
-<h3>Volumes<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
-<p>Docker containers are fully isolated. It is necessary to mount volumes in order to handle input/output files.</p>
-<p>Syntax: <strong>--volume/-v</strong> <em>host:container</em></p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">mkdir data</span>
-<span class="gp"># </span>We<span class="w"> </span>can<span class="w"> </span>copy<span class="w"> </span>some<span class="w"> </span>FASTQ<span class="w"> </span><span class="k">in</span><span class="w"> </span>data
-<span class="go">docker run --volume $(pwd)/data:/scratch --name fastqc_container biocontainers/fastqc:v0.11.9_cv7 fastqc /scratch/B7_input_s_chr19.fastq.gz</span>
-</pre></div>
-</div>
-</section>
 </section>
 <section id="singularity">
 <h2>Singularity<a class="headerlink" href="#singularity" title="Link to this heading"></a></h2>
@@ -406,7 +411,7 @@
 </dl>
 </li>
 <li><p>Origin: Lawrence Berkeley National Laboratory. Later spin-off: Sylabs</p></li>
-<li><p>Version 1.0 -&gt; 2016</p></li>
+<li><p>Version 1.0 (2016)</p></li>
 <li><p>More information: <a class="reference external" href="https://en.wikipedia.org/wiki/Singularity_(software)">https://en.wikipedia.org/wiki/Singularity_(software)</a></p></li>
 </ul>
 <section id="singularity-architecture">
@@ -467,8 +472,8 @@
 </pre></div>
 </div>
 </section>
-<section id="id2">
-<h4>Biocontainers<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
+<section id="id1">
+<h4>Biocontainers<a class="headerlink" href="#id1" title="Link to this heading"></a></h4>
 <ul class="simple">
 <li><p><a class="reference external" href="https://biocontainers.pro">Biocontainers</a></p></li>
 </ul>
@@ -486,6 +491,20 @@
 </div>
 <p>Galaxy project provides all Bioinformatics software from the BioContainers initiative as Singularity prebuilt images. If download and conversion time of images is an issue, this might be the best option for those working in the biomedical field.</p>
 <p>Link: <a class="reference external" href="https://depot.galaxyproject.org/singularity/">https://depot.galaxyproject.org/singularity/</a></p>
+<p><strong>From Docker daemon</strong></p>
+<p>If you have a Docker daemon running in your machine, you can also build images from there without need to share them in a registry first.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">singularity build myubuntu.sif docker-daemon://myubuntu:latest</span>
+</pre></div>
+</div>
+<p><strong>From a Docker tar archive</strong></p>
+<p>If you saved a tar archive from a Docker image, you can also build images from there. This is useful if you might not have a Docker daemon running in the machine you intend to use Singularity.
+This is common in HPC environments.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp"># </span>Where<span class="w"> </span>you<span class="w"> </span>have<span class="w"> </span>a<span class="w"> </span>Docker<span class="w"> </span>daemon<span class="w"> </span>running
+<span class="go">      docker save -o myubuntu.tar myubuntu:latest</span>
+<span class="gp"># </span>Where<span class="w"> </span>you<span class="w"> </span>have<span class="w"> </span>Singularity
+<span class="go">singularity build myubuntu.sif docker-archive://myubuntu.tar</span>
+</pre></div>
+</div>
 </section>
 </section>
 <section id="running-and-executing-containers">
@@ -501,7 +520,7 @@
 </section>
 <section id="singularity-exec">
 <h4>Singularity exec<a class="headerlink" href="#singularity-exec" title="Link to this heading"></a></h4>
-<p>That is the most common way to execute Singularity (equivalent to <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">exec</span></code>). That would be the normal approach in a HPC environment.</p>
+<p>That is the most common way to execute Singularity (equivalent to <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">exec</span></code>). That would be the normal approach in an HPC environment.</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">singularity exec fastqc-0.11.9.sif fastqc</span>
 </pre></div>
 </div>
@@ -512,7 +531,7 @@
 </section>
 <section id="environment-control">
 <h4>Environment control<a class="headerlink" href="#environment-control" title="Link to this heading"></a></h4>
-<p>By default Singularity inherits a profile environment (e.g., PATH environment variable). This may be convenient in some circumstances, but it can also lead to unexpected problems when your own environment clashes with the default one from the image.</p>
+<p>By default, Singularity inherits a profile environment (e.g., PATH environment variable). This may be convenient in some circumstances, but it can also lead to unexpected problems when your own environment clashes with the default one from the image.</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">singularity shell -e fastqc-0.11.9.sif</span>
 <span class="go">singularity exec -e fastqc-0.11.9.sif fastqc</span>
 </pre></div>
