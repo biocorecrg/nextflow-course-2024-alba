@@ -54,9 +54,9 @@
 <li class="toctree-l1"><a class="reference internal" href="nextflow_3.html">3 Nextflow</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">4 Nextflow</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#using-singularity">Using Singularity</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#making-a-nextflow-pipeline-for-image-processing">Making a Nextflow pipeline for image processing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#profiles">Profiles</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#deployment-in-the-aws-cloud">Deployment in the AWS cloud</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#making-a-nextflow-pipeline-for-image-processing">Making a Nextflow pipeline for image processing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#exercise">EXERCISE</a></li>
 </ul>
 </li>
@@ -154,294 +154,6 @@ This can be done using the Nextflow parameter <cite>-with-singularity</cite> wit
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">qsub .command.run</span>
 </pre></div>
 </div>
-</section>
-<section id="making-a-nextflow-pipeline-for-image-processing">
-<h2>Making a Nextflow pipeline for image processing<a class="headerlink" href="#making-a-nextflow-pipeline-for-image-processing" title="Link to this heading"></a></h2>
-<p>We can build a pipeline incrementally adding more and more processes.
-Nextflow will handle the dependencies between the input/output and the parallelization.</p>
-<p>Let’s see the content of the folder <cite>nextflow/ex_alba</cite></p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">ls</span>
-<span class="go">etl_peem.py  importUview_v3.py  step1_denoise.py  step2_normalize.py  step3_aggregate_and_save.py</span>
-</pre></div>
-</div>
-<p>We have some python scripts made by Fernán and Nicolas for making those steps:</p>
-<ul class="simple">
-<li><p><cite>step1_denoise.py</cite>: it will read an image file (“.dat”), turn it into a NumPy array (“_den.npy”), and denoise it.</p></li>
-</ul>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp"># </span><span class="nb">command</span><span class="w"> </span>line
-<span class="go">./step1_denoise.py my_image.dat</span>
-<span class="gp"># </span>output<span class="w"> </span>my_image_den.npy
-</pre></div>
-</div>
-<ul class="simple">
-<li><p><cite>step2_normalize.py</cite>: it will read a denoised NumPy array (“_den.npy”), that is output by the previous step and produces a nomalized / denoised NumPy array (“_den_norm.npy”). It needs the original image file in the current directory for working even if not specified in the command line.</p></li>
-</ul>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">ls ./</span>
-<span class="go">step2_normalize.py my_image_den.npy my_image.dat</span>
-<span class="gp"># </span><span class="nb">command</span><span class="w"> </span>line
-<span class="go">./step2_normalize.py my_image_den.npy</span>
-<span class="gp"># </span>output<span class="w"> </span>my_image_den_norm.npy
-</pre></div>
-</div>
-<ul class="simple">
-<li><p><cite>step3_aggregate_and_save.py</cite>: it will read all the normalized / denoised NumPy arrays together and it will produce a NeXus/HDF5 file called example.nxs</p></li>
-</ul>
-<p>In <strong>params.config</strong>, we have to add new parameters:</p>
-<div class="highlight-groovy notranslate"><div class="highlight"><pre><span></span><span class="n">params</span><span class="w"> </span><span class="o">{</span>
-<span class="w">	</span><span class="n">reads</span><span class="w">		</span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;$baseDir/../../testdata/*.fastq.gz&quot;</span>
-<span class="w">	</span><span class="n">reference</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;$baseDir/../../testdata/chr19.fasta.gz&quot;</span>
-<span class="w">        </span><span class="n">outdir</span><span class="w">          </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;$baseDir&quot;</span>
-<span class="w">        </span><span class="c1">//outdir          = &quot;s3://class-bucket-1/results&quot;</span>
-<span class="w">	</span><span class="n">email</span><span class="w">		</span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;myemail@google.com&quot;</span>
-<span class="o">}</span>
-</pre></div>
-</div>
-<p>In <strong>test3.nf</strong>, we have to add a new input for the reference sequence:</p>
-<div class="highlight-groovy notranslate"><div class="highlight"><pre><span></span><span class="cp">#!/usr/bin/env nextflow</span>
-
-<span class="cm">/* </span>
-<span class="cm"> * This code enables the new dsl of Nextflow. </span>
-<span class="cm"> */</span>
-
-<span class="n">nextflow</span><span class="o">.</span><span class="na">enable</span><span class="o">.</span><span class="na">dsl</span><span class="o">=</span><span class="mi">2</span>
-
-
-<span class="cm">/* </span>
-<span class="cm"> * NextFlow test pipe</span>
-<span class="cm"> * @authors</span>
-<span class="cm"> * Luca Cozzuto &lt;lucacozzuto@gmail.com&gt;</span>
-<span class="cm"> * </span>
-<span class="cm"> */</span>
-
-<span class="cm">/*</span>
-<span class="cm"> * Input parameters: read pairs</span>
-<span class="cm"> * Params are stored in the params.config file</span>
-<span class="cm"> */</span>
-
-<span class="n">version</span><span class="w">                 </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;1.0&quot;</span>
-<span class="c1">// this prevents a warning of undefined parameter</span>
-<span class="n">params</span><span class="o">.</span><span class="na">help</span><span class="w">             </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
-
-<span class="c1">// this prints the input parameters</span>
-<span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="w"> </span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">BIOCORE@CRG - N F TESTPIPE  ~  version ${version}</span>
-<span class="s2">=============================================</span>
-<span class="s2">reads                           : ${params.reads}</span>
-<span class="hll"><span class="s2">reference                       : ${params.reference}</span>
-</span><span class="hll"><span class="s2">outdir                          : ${params.outdir}</span>
-</span><span class="s2">&quot;&quot;&quot;</span>
-
-<span class="c1">// this prints the help in case you use --help parameter in the command line and it stops the pipeline</span>
-<span class="k">if</span><span class="w"> </span><span class="o">(</span><span class="n">params</span><span class="o">.</span><span class="na">help</span><span class="o">)</span><span class="w"> </span><span class="o">{</span>
-<span class="w">    </span><span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="w"> </span><span class="s1">&#39;This is the Biocore\&#39;s NF test pipeline&#39;</span>
-<span class="w">    </span><span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="w"> </span><span class="s1">&#39;Enjoy!&#39;</span>
-<span class="w">    </span><span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="w"> </span><span class="s1">&#39;\n&#39;</span>
-<span class="w">    </span><span class="n">exit</span><span class="w"> </span><span class="mi">1</span>
-<span class="o">}</span>
-
-<span class="hll"><span class="cm">/*</span>
-</span><span class="hll"><span class="cm"> * Defining the output folders.</span>
-</span><span class="hll"><span class="cm"> */</span>
-</span><span class="hll"><span class="n">fastqcOutputFolder</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;${params.outdir}/ouptut_fastqc&quot;</span>
-</span><span class="hll"><span class="n">alnOutputFolder</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;${params.outdir}/ouptut_aln&quot;</span>
-</span><span class="hll"><span class="n">multiqcOutputFolder</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;${params.outdir}/ouptut_multiQC&quot;</span>
-</span>
-
-<span class="cm">/* Reading the file list and creating a &quot;Channel&quot;: a queue that connects different channels.</span>
-<span class="cm"> * The queue is consumed by channels, so you cannot re-use a channel for different processes. </span>
-<span class="cm"> * If you need the same data for different processes you need to make more channels.</span>
-<span class="cm"> */</span>
-<span class="w"> </span>
-<span class="n">Channel</span>
-<span class="w">    </span><span class="o">.</span><span class="na">fromPath</span><span class="o">(</span><span class="w"> </span><span class="n">params</span><span class="o">.</span><span class="na">reads</span><span class="w"> </span><span class="o">)</span><span class="w">  											 </span>
-<span class="w">    </span><span class="o">.</span><span class="na">ifEmpty</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">error</span><span class="w"> </span><span class="s2">&quot;Cannot find any reads matching: ${params.reads}&quot;</span><span class="w"> </span><span class="o">}</span><span class="w"> </span>
-<span class="w">    </span><span class="o">.</span><span class="na">set</span><span class="w"> </span><span class="o">{</span><span class="n">reads</span><span class="o">}</span><span class="w"> 											 </span>
-
-<span class="n">reference</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">file</span><span class="o">(</span><span class="n">params</span><span class="o">.</span><span class="na">reference</span><span class="o">)</span>
-
-<span class="cm">/*</span>
-<span class="cm"> * Process 1. Run FastQC on raw data. A process is the element for executing scripts / programs etc.</span>
-<span class="cm"> */</span>
-<span class="n">process</span><span class="w"> </span><span class="n">fastQC</span><span class="w"> </span><span class="o">{</span>
-<span class="w">    </span><span class="n">publishDir</span><span class="w"> </span><span class="n">fastqcOutputFolder</span><span class="w">  			</span>
-<span class="w">    </span><span class="n">tag</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="s2">&quot;${reads}&quot;</span><span class="w"> </span><span class="o">}</span><span class="w">  							</span>
-
-<span class="w">    </span><span class="nl">input:</span>
-<span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="n">reads</span><span class="w">   							</span>
-
-<span class="w">    </span><span class="nl">output:</span><span class="w">									</span>
-<span class="w">   	</span><span class="n">path</span><span class="w"> </span><span class="s2">&quot;*_fastqc.*&quot;</span>
-
-<span class="w">    </span><span class="nl">script:</span><span class="w">									</span>
-<span class="w">    </span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">        fastqc ${reads} </span>
-<span class="s2">    &quot;&quot;&quot;</span>
-<span class="o">}</span>
-
-<span class="cm">/*</span>
-<span class="cm"> * Process 2. Bowtie index</span>
-<span class="cm"> */</span>
-<span class="n">process</span><span class="w"> </span><span class="n">bowtieIdx</span><span class="w"> </span><span class="o">{</span>
-<span class="w">    </span><span class="n">tag</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="s2">&quot;${ref}&quot;</span><span class="w"> </span><span class="o">}</span><span class="w">  							</span>
-
-
-<span class="w">    </span><span class="nl">input:</span>
-<span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="n">ref</span><span class="w">   							</span>
-
-<span class="w">    </span><span class="nl">output:</span><span class="w">									</span>
-<span class="w">   	</span><span class="n">tuple</span><span class="w"> </span><span class="n">val</span><span class="o">(</span><span class="s2">&quot;${ref}&quot;</span><span class="o">),</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">(</span><span class="s2">&quot;${ref}*.ebwt&quot;</span><span class="o">)</span>
-
-<span class="w">    </span><span class="nl">script:</span><span class="w">									</span>
-<span class="w">    </span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">        gunzip -c ${ref} &gt; reference.fa</span>
-<span class="s2">        bowtie-build reference.fa ${ref}</span>
-<span class="s2">        rm reference.fa</span>
-<span class="s2">    &quot;&quot;&quot;</span>
-<span class="o">}</span>
-
-<span class="cm">/*</span>
-<span class="cm"> * Process 3. Bowtie alignment</span>
-<span class="cm"> */</span>
-<span class="n">process</span><span class="w"> </span><span class="n">bowtieAln</span><span class="w"> </span><span class="o">{</span>
-<span class="w">    </span><span class="n">publishDir</span><span class="w"> </span><span class="n">alnOutputFolder</span><span class="o">,</span><span class="w"> </span><span class="nl">pattern:</span><span class="w"> </span><span class="s1">&#39;*.sam&#39;</span>
-
-<span class="w">    </span><span class="n">tag</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="s2">&quot;${reads}&quot;</span><span class="w"> </span><span class="o">}</span><span class="w">  							</span>
-<span class="w">    </span><span class="n">label</span><span class="w"> </span><span class="s1">&#39;twocpus&#39;</span><span class="w"> </span>
-
-<span class="w">    </span><span class="nl">input:</span>
-<span class="w">    </span><span class="n">tuple</span><span class="w"> </span><span class="n">val</span><span class="o">(</span><span class="n">refname</span><span class="o">),</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">(</span><span class="n">ref_files</span><span class="o">)</span>
-<span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="n">reads</span><span class="w">  							</span>
-
-<span class="w">    </span><span class="nl">output:</span><span class="w">									</span>
-<span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="s2">&quot;${reads}.sam&quot;</span><span class="o">,</span><span class="w"> </span><span class="nl">emit:</span><span class="w"> </span><span class="n">samples_sam</span>
-<span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="s2">&quot;${reads}.log&quot;</span><span class="o">,</span><span class="w"> </span><span class="nl">emit:</span><span class="w"> </span><span class="n">samples_log</span>
-
-<span class="w">    </span><span class="nl">script:</span><span class="w">									</span>
-<span class="w">    </span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">    bowtie -p ${task.cpus} ${refname} -q ${reads} -S &gt; ${reads}.sam 2&gt; ${reads}.log</span>
-<span class="s2">    &quot;&quot;&quot;</span>
-<span class="o">}</span>
-<span class="cm">/*</span>
-
-<span class="cm">/*</span>
-<span class="cm"> * Process 4. Run multiQC on fastQC results</span>
-<span class="cm"> */</span>
-<span class="n">process</span><span class="w"> </span><span class="n">multiQC</span><span class="w"> </span><span class="o">{</span>
-<span class="w">    </span><span class="n">publishDir</span><span class="w"> </span><span class="n">multiqcOutputFolder</span><span class="o">,</span><span class="w"> </span><span class="nl">mode:</span><span class="w"> </span><span class="s1">&#39;copy&#39;</span><span class="w"> 	</span><span class="c1">// this time do not link but copy the output file</span>
-
-<span class="w">    </span><span class="nl">input:</span>
-<span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="o">(</span><span class="n">inputfiles</span><span class="o">)</span>
-
-<span class="w">    </span><span class="nl">output:</span>
-<span class="w">    </span><span class="n">path</span><span class="o">(</span><span class="s2">&quot;multiqc_report.html&quot;</span><span class="o">)</span><span class="w"> 					</span>
-
-<span class="w">    </span><span class="nl">script:</span>
-<span class="w">    </span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">    multiqc .</span>
-<span class="s2">    &quot;&quot;&quot;</span>
-<span class="o">}</span>
-
-<span class="n">workflow</span><span class="w"> </span><span class="o">{</span>
-<span class="w">    </span><span class="n">reads</span><span class="o">.</span><span class="na">view</span><span class="o">()</span>
-<span class="w">	</span><span class="n">fastqc_out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fastQC</span><span class="o">(</span><span class="n">reads</span><span class="o">)</span>
-<span class="w">	</span><span class="n">bowtie_index</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bowtieIdx</span><span class="o">(</span><span class="n">reference</span><span class="o">)</span>
-<span class="w">	</span><span class="n">bowtieAln</span><span class="o">(</span><span class="n">bowtie_index</span><span class="o">,</span><span class="w"> </span><span class="n">reads</span><span class="o">)</span>
-<span class="w">	</span>
-<span class="w">	</span><span class="n">multiQC</span><span class="o">(</span><span class="n">fastqc_out</span><span class="o">.</span><span class="na">mix</span><span class="o">(</span><span class="n">bowtieAln</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">samples_log</span><span class="o">).</span><span class="na">collect</span><span class="o">())</span>
-<span class="o">}</span>
-
-
-<span class="n">workflow</span><span class="o">.</span><span class="na">onComplete</span><span class="w"> </span><span class="o">{</span><span class="w"> </span>
-<span class="w">	</span><span class="n">println</span><span class="w"> </span><span class="o">(</span><span class="w"> </span><span class="n">workflow</span><span class="o">.</span><span class="na">success</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s2">&quot;\nDone! Open the following report in your browser --&gt; ${multiqcOutputFolder}/multiqc_report.html\n&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Oops .. something went wrong&quot;</span><span class="w"> </span><span class="o">)</span>
-<span class="o">}</span>
-</pre></div>
-</div>
-<p>This way, the <strong>singleton channel</strong> called <strong>reference</strong> is created. Its content can be used indefinitely. We also add a path specifying where to place the output files.</p>
-<div class="highlight-groovy notranslate"><div class="highlight"><pre><span></span><span class="cm">/*</span>
-<span class="cm"> * Defining the output folders.</span>
-<span class="cm"> */</span>
-<span class="n">fastqcOutputFolder</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;${params.outdir}/output_fastqc&quot;</span>
-<span class="n">alnOutputFolder</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;${params.outdir}/output_aln&quot;</span>
-<span class="n">multiqcOutputFolder</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;${params.outdir}/output_multiQC&quot;</span>
-</pre></div>
-</div>
-<p>And we have to add two new processes. The first one is for indexing the reference genome (with <cite>bowtie-build</cite>):</p>
-<div class="highlight-groovy notranslate"><div class="highlight"><pre><span></span><span class="cm">/*</span>
-<span class="cm"> * Process 2. Bowtie index</span>
-<span class="cm"> */</span>
-<span class="n">process</span><span class="w"> </span><span class="n">bowtieIdx</span><span class="w"> </span><span class="o">{</span>
-<span class="w">    </span><span class="n">tag</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="s2">&quot;${ref}&quot;</span><span class="w"> </span><span class="o">}</span><span class="w">  							</span>
-
-
-<span class="w">    </span><span class="nl">input:</span>
-<span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="n">ref</span><span class="w">   							</span>
-
-<span class="w">    </span><span class="nl">output:</span><span class="w">									</span>
-<span class="w">   	</span><span class="n">tuple</span><span class="w"> </span><span class="n">val</span><span class="o">(</span><span class="s2">&quot;${ref}&quot;</span><span class="o">),</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">(</span><span class="s2">&quot;${ref}*.ebwt&quot;</span><span class="o">)</span>
-
-<span class="w">    </span><span class="nl">script:</span><span class="w">									</span>
-<span class="w">    </span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">        gunzip -c ${ref} &gt; reference.fa</span>
-<span class="s2">        bowtie-build reference.fa ${ref}</span>
-<span class="s2">        rm reference.fa</span>
-<span class="s2">    &quot;&quot;&quot;</span>
-<span class="o">}</span>
-</pre></div>
-</div>
-<p>Since bowtie indexing requires an unzipped reference fasta file, we first <strong>gunzip</strong> it, then build the reference index, and finally remove the unzipped file.</p>
-<p>The output channel is organized as a <strong>tuple</strong>; i.e., a list of elements.</p>
-<p>The first element of the list is the <strong>name of the index as a value</strong>, and the second is a <strong>list of files constituting the index</strong>.</p>
-<p>The former is needed for building the command line of the alignment step, the latter are the files needed for the alignment.</p>
-<p>The second process <strong>bowtieAln</strong> is the alignment step:</p>
-<div class="highlight-groovy notranslate"><div class="highlight"><pre><span></span><span class="cm">/*</span>
-<span class="cm"> * Process 3. Bowtie alignment</span>
-<span class="cm"> */</span>
-<span class="n">process</span><span class="w"> </span><span class="n">bowtieAln</span><span class="w"> </span><span class="o">{</span>
-<span class="w">    </span><span class="n">publishDir</span><span class="w"> </span><span class="n">alnOutputFolder</span><span class="o">,</span><span class="w"> </span><span class="nl">pattern:</span><span class="w"> </span><span class="s1">&#39;*.sam&#39;</span>
-
-<span class="w">    </span><span class="n">tag</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="s2">&quot;${reads}&quot;</span><span class="w"> </span><span class="o">}</span><span class="w">  							</span>
-<span class="w">    </span><span class="n">label</span><span class="w"> </span><span class="s1">&#39;twocpus&#39;</span><span class="w"> </span>
-
-<span class="w">    </span><span class="nl">input:</span>
-<span class="w">    </span><span class="n">tuple</span><span class="w"> </span><span class="n">val</span><span class="o">(</span><span class="n">refname</span><span class="o">),</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">(</span><span class="n">ref_files</span><span class="o">)</span>
-<span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="n">reads</span><span class="w">  							</span>
-
-<span class="w">    </span><span class="nl">output:</span><span class="w">									</span>
-<span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="s2">&quot;${reads}.sam&quot;</span><span class="o">,</span><span class="w"> </span><span class="nl">emit:</span><span class="w"> </span><span class="n">samples_sam</span>
-<span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="s2">&quot;${reads}.log&quot;</span><span class="o">,</span><span class="w"> </span><span class="nl">emit:</span><span class="w"> </span><span class="n">samples_log</span>
-
-<span class="w">    </span><span class="nl">script:</span><span class="w">									</span>
-<span class="w">    </span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">    bowtie -p ${task.cpus} ${refname} -q ${reads} -S &gt; ${reads}.sam 2&gt; ${reads}.log</span>
-<span class="s2">    &quot;&quot;&quot;</span>
-<span class="o">}</span>
-</pre></div>
-</div>
-<p>There are two different input channels, the <strong>index</strong> and <strong>reads</strong>.</p>
-<p>The index name specified by <strong>refname</strong> is used for building the command line; while the index files, indicated by <strong>ref_files</strong>, are linked to the current directory by using the <strong>path</strong> qualifier.</p>
-<p>We also produced two kinds of outputs, the <strong>alignments</strong> and <strong>logs</strong>.
-The first one is the one we want to keep as a final result; for that, we specify the <strong>pattern</strong> parameter in <strong>publishDir</strong>.</p>
-<div class="highlight-groovy notranslate"><div class="highlight"><pre><span></span><span class="n">publishDir</span><span class="w"> </span><span class="n">alnOutputFolder</span><span class="o">,</span><span class="w"> </span><span class="nl">pattern:</span><span class="w"> </span><span class="s1">&#39;*.sam&#39;</span>
-</pre></div>
-</div>
-<p>The second output will be passed to the next process, which is the multiQC process. To distinguish the outputs let’s assign them different names.</p>
-<div class="highlight-groovy notranslate"><div class="highlight"><pre><span></span><span class="nl">output:</span>
-<span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="s2">&quot;${reads}.sam&quot;</span><span class="o">,</span><span class="w"> </span><span class="nl">emit:</span><span class="w"> </span><span class="n">samples_sam</span>
-<span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="s2">&quot;${reads}.log&quot;</span><span class="o">,</span><span class="w"> </span><span class="nl">emit:</span><span class="w"> </span><span class="n">samples_log</span>
-</pre></div>
-</div>
-<p>This section will allow us to connect these outputs directly with other processes when we call them in the workflow section:</p>
-<div class="highlight-groovy notranslate"><div class="highlight"><pre><span></span><span class="n">workflow</span><span class="w"> </span><span class="o">{</span>
-<span class="w">    </span><span class="n">reads</span><span class="o">.</span><span class="na">view</span><span class="o">()</span>
-<span class="w">	</span><span class="n">fastqc_out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fastQC</span><span class="o">(</span><span class="n">reads</span><span class="o">)</span>
-<span class="w">	</span><span class="n">bowtie_index</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bowtieIdx</span><span class="o">(</span><span class="n">reference</span><span class="o">)</span>
-<span class="w">	</span><span class="n">bowtieAln</span><span class="o">(</span><span class="n">bowtie_index</span><span class="o">,</span><span class="w"> </span><span class="n">reads</span><span class="o">)</span>
-<span class="w">	</span>
-<span class="w">	</span><span class="n">multiQC</span><span class="o">(</span><span class="n">fastqc_out</span><span class="o">.</span><span class="na">mix</span><span class="o">(</span><span class="n">bowtieAln</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">samples_log</span><span class="o">).</span><span class="na">collect</span><span class="o">())</span>
-<span class="o">}</span>
-</pre></div>
-</div>
-<p>As you can see, we passed the <strong>samples_log</strong> output to the multiqc process after mixing it with the output channel from the fastqc process.</p>
 </section>
 <section id="profiles">
 <h2>Profiles<a class="headerlink" href="#profiles" title="Link to this heading"></a></h2>
@@ -588,16 +300,44 @@ This is mandatory when running Nextflow on the cloud.</p>
 </pre></div>
 </div>
 </section>
+<section id="making-a-nextflow-pipeline-for-image-processing">
+<h2>Making a Nextflow pipeline for image processing<a class="headerlink" href="#making-a-nextflow-pipeline-for-image-processing" title="Link to this heading"></a></h2>
+<p>We can build a pipeline incrementally adding more and more processes.
+Nextflow will handle the dependencies between the input/output and the parallelization.</p>
+<p>Let’s see the content of the folder <strong>nextflow/ex_alba</strong></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">ls</span>
+<span class="go">etl_peem.py  importUview_v3.py  step1_denoise.py  step2_normalize.py  step3_aggregate_and_save.py</span>
+</pre></div>
+</div>
+<p>We have some Python scripts made by Fernán and Nicolas for making those steps:</p>
+<ul class="simple">
+<li><p><strong>step1_denoise.py</strong>: it will read an image file (“.dat”), turn it into a NumPy array (“_den.npy”), and denoise it.</p></li>
+</ul>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp"># </span><span class="nb">command</span><span class="w"> </span>line
+<span class="go">./step1_denoise.py my_image.dat</span>
+<span class="gp"># </span>output<span class="w"> </span>my_image_den.npy
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>step2_normalize.py</strong>: it will read a denoised NumPy array (“_den.npy”), that is output by the previous step and produces a nomalized / denoised NumPy array (“_den_norm.npy”). It needs the original image file in the current directory for working even if not specified in the command line.</p></li>
+</ul>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">ls ./</span>
+<span class="go">step2_normalize.py my_image_den.npy my_image.dat</span>
+<span class="gp"># </span><span class="nb">command</span><span class="w"> </span>line
+<span class="go">./step2_normalize.py my_image_den.npy</span>
+<span class="gp"># </span>output<span class="w"> </span>my_image_den_norm.npy
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>step3_aggregate_and_save.py</strong>: it will read all the normalized/denoised NumPy arrays together and it will produce a NeXus/HDF5 file called <strong>example.nxs</strong></p></li>
+</ul>
+</section>
 <section id="exercise">
 <h2>EXERCISE<a class="headerlink" href="#exercise" title="Link to this heading"></a></h2>
-<p>Modify the <strong>test3.nf</strong> file to make two sub-workflows:</p>
-<ul class="simple">
-<li><p>for fastqc of fastq files and bowtie alignment;</p></li>
-<li><p>for a fastqc analysis of the aligned files produced by bowtie.</p></li>
-</ul>
-<p>For convenience, you can use the multiqc config file called <strong>config.yaml</strong> in the multiqc process.</p>
+<p>Make the pipeline considering the use of the docker/singularity image <strong>biocorecrg/alba:0.1</strong> hosted at dockerhub. The images are at <strong>../../testdata/test_images/</strong> and the executor must be specified for working with our infrastructure.</p>
 <details>
 <summary><a>Solution</a></summary><div class="highlight-groovy notranslate"><div class="highlight"><pre><span></span><span class="cp">#!/usr/bin/env nextflow</span>
+
 
 <span class="cm">/* </span>
 <span class="cm"> * This code enables the new dsl of Nextflow. </span>
@@ -626,8 +366,7 @@ This is mandatory when running Nextflow on the cloud.</p>
 <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="w"> </span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">BIOCORE@CRG - N F TESTPIPE  ~  version ${version}</span>
 <span class="s2">=============================================</span>
-<span class="s2">reads                           : ${params.reads}</span>
-<span class="s2">reference                       : ${params.reference}</span>
+<span class="s2">images                           : ${params.images}</span>
 <span class="s2">&quot;&quot;&quot;</span>
 
 <span class="c1">// this prints the help in case you use --help parameter in the command line and it stops the pipeline</span>
@@ -641,9 +380,8 @@ This is mandatory when running Nextflow on the cloud.</p>
 <span class="cm">/*</span>
 <span class="cm"> * Defining the output folders.</span>
 <span class="cm"> */</span>
-<span class="n">fastqcOutputFolder</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;ouptut_fastqc&quot;</span>
-<span class="n">alnOutputFolder</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;ouptut_aln&quot;</span>
-<span class="n">multiqcOutputFolder</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;ouptut_multiQC&quot;</span>
+<span class="n">output_denoise</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;output_denoise&quot;</span>
+<span class="n">output_aggregate</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;output_aggregate&quot;</span>
 
 
 <span class="cm">/* Reading the file list and creating a &quot;Channel&quot;: a queue that connects different channels.</span>
@@ -652,122 +390,78 @@ This is mandatory when running Nextflow on the cloud.</p>
 <span class="cm"> */</span>
 <span class="w"> </span>
 <span class="n">Channel</span>
-<span class="w">    </span><span class="o">.</span><span class="na">fromPath</span><span class="o">(</span><span class="w"> </span><span class="n">params</span><span class="o">.</span><span class="na">reads</span><span class="w"> </span><span class="o">)</span><span class="w">  											 </span>
-<span class="w">    </span><span class="o">.</span><span class="na">ifEmpty</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">error</span><span class="w"> </span><span class="s2">&quot;Cannot find any reads matching: ${params.reads}&quot;</span><span class="w"> </span><span class="o">}</span><span class="w"> </span>
-<span class="w">    </span><span class="o">.</span><span class="na">set</span><span class="w"> </span><span class="o">{</span><span class="n">reads</span><span class="o">}</span><span class="w"> 											 </span>
+<span class="w">    </span><span class="o">.</span><span class="na">fromFilePairs</span><span class="o">(</span><span class="w"> </span><span class="n">params</span><span class="o">.</span><span class="na">images</span><span class="o">,</span><span class="w"> </span><span class="nl">size:</span><span class="mi">1</span><span class="w"> </span><span class="o">,</span><span class="w"> </span><span class="nl">checkIfExists:</span><span class="w"> </span><span class="kc">true</span><span class="o">)</span><span class="w">  											 </span>
+<span class="w">    </span><span class="o">.</span><span class="na">set</span><span class="w"> </span><span class="o">{</span><span class="n">images</span><span class="o">}</span><span class="w"> 			                								 </span>
 
-<span class="n">reference</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">file</span><span class="o">(</span><span class="n">params</span><span class="o">.</span><span class="na">reference</span><span class="o">)</span>
-<span class="n">multiconf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">file</span><span class="o">(</span><span class="s2">&quot;config.yaml&quot;</span><span class="o">)</span>
 
 <span class="cm">/*</span>
-<span class="cm"> * Process 1. Run FastQC on raw data. A process is the element for executing scripts / programs etc.</span>
+<span class="cm"> * Process 1. De-noise input image</span>
 <span class="cm"> */</span>
-<span class="n">process</span><span class="w"> </span><span class="n">fastQC</span><span class="w"> </span><span class="o">{</span>
-<span class="w">    </span><span class="n">publishDir</span><span class="w"> </span><span class="n">fastqcOutputFolder</span><span class="w">  			</span>
-<span class="w">    </span><span class="n">tag</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="s2">&quot;${reads}&quot;</span><span class="w"> </span><span class="o">}</span><span class="w">  							</span>
+<span class="n">process</span><span class="w"> </span><span class="n">denoise</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="n">publishDir</span><span class="w"> </span><span class="n">output_denoise</span><span class="w">  			</span>
+
+<span class="w">    </span><span class="n">tag</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="s2">&quot;${image}&quot;</span><span class="w"> </span><span class="o">}</span><span class="w">  				</span>
+<span class="w">    </span><span class="n">label</span><span class="w"> </span><span class="s1">&#39;big_mem&#39;</span><span class="w"> </span>
 
 <span class="w">    </span><span class="nl">input:</span>
-<span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="n">reads</span><span class="w">   							</span>
+<span class="w">    </span><span class="n">tuple</span><span class="w"> </span><span class="n">val</span><span class="o">(</span><span class="n">id</span><span class="o">),</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">(</span><span class="n">image</span><span class="o">)</span><span class="w">   						</span>
 
-<span class="w">    </span><span class="nl">output:</span><span class="w">									</span>
-<span class="w">   	</span><span class="n">path</span><span class="w"> </span><span class="s2">&quot;*_fastqc.*&quot;</span>
+<span class="w">    </span><span class="nl">output:</span><span class="w">								</span>
+<span class="w">   	</span><span class="n">tuple</span><span class="w"> </span><span class="n">val</span><span class="o">(</span><span class="n">id</span><span class="o">),</span><span class="w"> </span><span class="n">path</span><span class="o">(</span><span class="s2">&quot;*_den.npy&quot;</span><span class="o">)</span>
 
-<span class="w">    </span><span class="nl">script:</span><span class="w">									</span>
+<span class="w">    </span><span class="nl">script:</span><span class="w">								</span>
 <span class="w">    </span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">        fastqc ${reads} </span>
+<span class="s2">		step1_denoise.py ${image}</span>
 <span class="s2">    &quot;&quot;&quot;</span>
 <span class="o">}</span>
 
 <span class="cm">/*</span>
-<span class="cm"> * Process 2. Bowtie index</span>
+<span class="cm"> * Process 1. Normalise the de-noise image</span>
 <span class="cm"> */</span>
-<span class="n">process</span><span class="w"> </span><span class="n">bowtieIdx</span><span class="w"> </span><span class="o">{</span>
-<span class="w">    </span><span class="n">tag</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="s2">&quot;${ref}&quot;</span><span class="w"> </span><span class="o">}</span><span class="w">  							</span>
+<span class="n">process</span><span class="w"> </span><span class="n">normalize</span><span class="w"> </span><span class="o">{</span>
+
+<span class="w">    </span><span class="n">tag</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="s2">&quot;${image}&quot;</span><span class="w"> </span><span class="o">}</span><span class="w">  				</span>
+<span class="w">    </span><span class="n">label</span><span class="w"> </span><span class="s1">&#39;big_mem&#39;</span><span class="w"> </span>
 
 <span class="w">    </span><span class="nl">input:</span>
-<span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="n">ref</span><span class="w">   							</span>
+<span class="w">    </span><span class="n">tuple</span><span class="w"> </span><span class="n">val</span><span class="o">(</span><span class="n">id</span><span class="o">),</span><span class="w"> </span><span class="n">path</span><span class="o">(</span><span class="n">image</span><span class="o">),</span><span class="w"> </span><span class="n">path</span><span class="o">(</span><span class="n">denoised</span><span class="o">)</span><span class="w">    	</span><span class="c1">// WE NEED THE IMAGE TO BE THERE BUT NOT IN THE COMMAND LINE					</span>
 
-<span class="w">    </span><span class="nl">output:</span><span class="w">									</span>
-<span class="w">   	</span><span class="n">tuple</span><span class="w"> </span><span class="n">val</span><span class="o">(</span><span class="s2">&quot;${ref}&quot;</span><span class="o">),</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">(</span><span class="s2">&quot;${ref}*.ebwt&quot;</span><span class="o">)</span>
+<span class="w">    </span><span class="nl">output:</span><span class="w">								</span>
+<span class="w">    </span><span class="n">path</span><span class="o">(</span><span class="s2">&quot;*_den_norm.npy&quot;</span><span class="o">)</span>
 
-<span class="w">    </span><span class="nl">script:</span><span class="w">									</span>
+<span class="w">    </span><span class="nl">script:</span><span class="w">								</span>
 <span class="w">    </span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">        gunzip -c ${ref} &gt; reference.fa</span>
-<span class="s2">        bowtie-build reference.fa ${ref}</span>
-<span class="s2">        rm reference.fa</span>
+<span class="s2">		step2_normalize.py ${denoised}</span>
 <span class="s2">    &quot;&quot;&quot;</span>
 <span class="o">}</span>
 
 <span class="cm">/*</span>
-<span class="cm"> * Process 3. Bowtie alignment</span>
+<span class="cm"> * Process 2. Run multiQC on fastQC results</span>
 <span class="cm"> */</span>
-<span class="n">process</span><span class="w"> </span><span class="n">bowtieAln</span><span class="w"> </span><span class="o">{</span>
-<span class="w">    </span><span class="n">publishDir</span><span class="w"> </span><span class="n">alnOutputFolder</span><span class="o">,</span><span class="w"> </span><span class="nl">pattern:</span><span class="w"> </span><span class="s1">&#39;*.sam&#39;</span>
-
-<span class="w">    </span><span class="n">tag</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="s2">&quot;${reads}&quot;</span><span class="w"> </span><span class="o">}</span><span class="w">  							</span>
-<span class="w">    </span><span class="n">label</span><span class="w"> </span><span class="s1">&#39;twocpus&#39;</span><span class="w"> </span>
+<span class="n">process</span><span class="w"> </span><span class="n">aggregate</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="n">publishDir</span><span class="w"> </span><span class="n">output_aggregate</span><span class="o">,</span><span class="w"> </span><span class="nl">mode:</span><span class="w"> </span><span class="s1">&#39;copy&#39;</span><span class="w"> 	</span><span class="c1">// this time do not link but copy the output file</span>
 
 <span class="w">    </span><span class="nl">input:</span>
-<span class="w">    </span><span class="n">tuple</span><span class="w"> </span><span class="n">val</span><span class="o">(</span><span class="n">refname</span><span class="o">),</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">(</span><span class="n">ref_files</span><span class="o">)</span>
-<span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="n">reads</span><span class="w">  							</span>
-
-<span class="w">    </span><span class="nl">output:</span><span class="w">									</span>
-<span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="s2">&quot;${reads}.sam&quot;</span><span class="o">,</span><span class="w"> </span><span class="nl">emit:</span><span class="w"> </span><span class="n">samples_sam</span>
-<span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="s2">&quot;${reads}.log&quot;</span><span class="o">,</span><span class="w"> </span><span class="nl">emit:</span><span class="w"> </span><span class="n">samples_log</span>
-
-<span class="w">    </span><span class="nl">script:</span><span class="w">									</span>
-<span class="w">    </span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">    bowtie -p ${task.cpus} ${refname} -q ${reads} -S &gt; ${reads}.sam 2&gt; ${reads}.log</span>
-<span class="s2">    &quot;&quot;&quot;</span>
-<span class="o">}</span>
-
-<span class="cm">/*</span>
-<span class="cm"> * Process 4. Run multiQC on fastQC results</span>
-<span class="cm"> */</span>
-<span class="n">process</span><span class="w"> </span><span class="n">multiQC</span><span class="w"> </span><span class="o">{</span>
-<span class="w">    </span><span class="n">publishDir</span><span class="w"> </span><span class="n">multiqcOutputFolder</span><span class="o">,</span><span class="w"> </span><span class="nl">mode:</span><span class="w"> </span><span class="s1">&#39;copy&#39;</span><span class="w"> 	</span><span class="c1">// this time do not link but copy the output file</span>
-
-<span class="w">    </span><span class="nl">input:</span>
-<span class="w">	</span><span class="n">path</span><span class="w"> </span><span class="o">(</span><span class="n">multiconf</span><span class="o">)</span>
 <span class="w">    </span><span class="n">path</span><span class="w"> </span><span class="o">(</span><span class="n">inputfiles</span><span class="o">)</span>
-<span class="w">	</span>
+
 <span class="w">    </span><span class="nl">output:</span>
-<span class="w">    </span><span class="n">path</span><span class="o">(</span><span class="s2">&quot;multiqc_report.html&quot;</span><span class="o">)</span><span class="w"> 					</span>
+<span class="w">    </span><span class="n">path</span><span class="o">(</span><span class="s2">&quot;*&quot;</span><span class="o">)</span><span class="w"> 					</span><span class="c1">// do not send the results to any channel</span>
 
 <span class="w">    </span><span class="nl">script:</span>
 <span class="w">    </span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">    multiqc . -c ${multiconf}</span>
+<span class="s2">    step3_aggregate_and_save.py ./</span>
 <span class="s2">    &quot;&quot;&quot;</span>
 <span class="o">}</span>
 
-<span class="n">workflow</span><span class="w"> </span><span class="n">flow1</span><span class="w"> </span><span class="o">{</span>
-<span class="w">    </span><span class="nl">take:</span><span class="w"> </span>
-<span class="w">    </span><span class="n">reads</span>
-<span class="w">    </span><span class="n">ref</span>
-<span class="w">    </span>
-<span class="w">    </span><span class="nl">main:</span>
-<span class="w">	</span><span class="n">fastqc_out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fastQC</span><span class="o">(</span><span class="n">reads</span><span class="o">)</span>
-<span class="w">	</span><span class="n">bowtie_index</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bowtieIdx</span><span class="o">(</span><span class="n">ref</span><span class="o">)</span>
-<span class="w">	</span><span class="n">bowtieAln</span><span class="o">(</span><span class="n">bowtie_index</span><span class="o">,</span><span class="w"> </span><span class="n">reads</span><span class="o">)</span>
-<span class="w">	</span><span class="nl">emit:</span>
-<span class="w">	</span><span class="n">sam</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bowtieAln</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">samples_sam</span>
-<span class="w">	</span><span class="n">logs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bowtieAln</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">samples_log</span>
-<span class="w">	</span><span class="n">fastqc_out</span>
-<span class="o">}</span>
-
-
-<span class="n">workflow</span><span class="w"> </span><span class="n">flow2</span><span class="w"> </span><span class="o">{</span>
-<span class="w">    </span><span class="nl">take:</span><span class="w"> </span><span class="n">alns</span>
-<span class="w">    </span><span class="nl">main:</span>
-<span class="w">	</span><span class="n">fastqc_out2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fastQC</span><span class="o">(</span><span class="n">alns</span><span class="o">)</span>
-<span class="w">	</span><span class="nl">emit:</span>
-<span class="w">	</span><span class="n">fastqc_out2</span>
-<span class="o">}</span>
-
 <span class="n">workflow</span><span class="w"> </span><span class="o">{</span>
-<span class="w">    </span><span class="n">flow1</span><span class="o">(</span><span class="n">reads</span><span class="o">,</span><span class="w"> </span><span class="n">reference</span><span class="o">)</span>
-<span class="w">    </span><span class="n">flow2</span><span class="o">(</span><span class="n">flow1</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">sam</span><span class="o">)</span>
-<span class="w"> 	</span><span class="n">multiQC</span><span class="o">(</span><span class="n">multiconf</span><span class="o">,</span><span class="w"> </span><span class="n">flow1</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">fastqc_out</span><span class="o">.</span><span class="na">mix</span><span class="o">(</span><span class="n">flow1</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">logs</span><span class="o">).</span><span class="na">mix</span><span class="o">(</span><span class="n">flow2</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">fastqc_out2</span><span class="o">).</span><span class="na">collect</span><span class="o">())</span>
+
+<span class="w">	</span><span class="c1">// HERE WE DO DENOISING </span>
+<span class="w">	</span><span class="n">denois_out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">denoise</span><span class="o">(</span><span class="n">images</span><span class="o">)</span>
+<span class="w">	</span><span class="c1">// HERE WE JOIN DENOISE OUTPUT WITH ORIGINAL IMAGES JUST FOR PRINTING PURPOSES</span>
+<span class="w">        </span><span class="n">images</span><span class="o">.</span><span class="na">join</span><span class="o">(</span><span class="n">denois_out</span><span class="o">).</span><span class="na">view</span><span class="o">()</span>
+<span class="w">    </span><span class="c1">// HERE WE RUN NORMALIZE </span>
+<span class="w">	</span><span class="n">normalized_out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="o">(</span><span class="n">images</span><span class="o">.</span><span class="na">join</span><span class="o">(</span><span class="n">denois_out</span><span class="o">))</span>
+<span class="w">	</span><span class="n">aggregate</span><span class="o">(</span><span class="n">normalized_out</span><span class="o">.</span><span class="na">collect</span><span class="o">())</span>
 <span class="o">}</span>
 
 
@@ -777,7 +471,6 @@ This is mandatory when running Nextflow on the cloud.</p>
 </pre></div>
 </div>
 </details><div class="line-block">
-<div class="line"><br /></div>
 <div class="line"><br /></div>
 </div>
 </section>
