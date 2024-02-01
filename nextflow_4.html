@@ -196,15 +196,15 @@ This can be done using the Nextflow parameter <cite>-with-singularity</cite> wit
 <div class="highlight-groovy notranslate"><div class="highlight"><pre><span></span><span class="w">   </span><span class="n">cluster</span><span class="w"> </span><span class="o">{</span>
 <span class="w">     </span><span class="n">process</span><span class="w"> </span><span class="o">{</span>
 <span class="w">        </span><span class="n">containerOptions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">workflow</span><span class="o">.</span><span class="na">containerEngine</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;docker&quot;</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s1">&#39;-u $(id -u):$(id -g)&#39;</span><span class="o">:</span><span class="w"> </span><span class="kc">null</span><span class="o">}</span>
-<span class="w">        </span><span class="n">executor</span><span class="o">=</span><span class="s2">&quot;SGE&quot;</span>
-<span class="w">        </span><span class="n">queue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;smallcpus&quot;</span>
+<span class="w">        </span><span class="n">executor</span><span class="o">=</span><span class="s2">&quot;slurm&quot;</span>
 
+<span class="w">        </span><span class="n">queue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;medium&quot;</span>
 <span class="w">        </span><span class="n">memory</span><span class="o">=</span><span class="s1">&#39;1G&#39;</span>
 <span class="w">        </span><span class="n">cpus</span><span class="o">=</span><span class="s1">&#39;1&#39;</span>
 <span class="w">        </span><span class="n">time</span><span class="o">=</span><span class="s1">&#39;6h&#39;</span>
 
 <span class="w">        </span><span class="nl">withLabel:</span><span class="w"> </span><span class="s1">&#39;twocpus&#39;</span><span class="w"> </span><span class="o">{</span>
-<span class="w">            </span><span class="n">queue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;bigcpus&quot;</span>
+<span class="w">            </span><span class="n">queue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;long&quot;</span>
 <span class="w">            </span><span class="n">memory</span><span class="o">=</span><span class="s1">&#39;4G&#39;</span>
 <span class="w">            </span><span class="n">cpus</span><span class="o">=</span><span class="s1">&#39;2&#39;</span>
 <span class="w">        </span><span class="o">}</span>
@@ -241,15 +241,15 @@ This can be done using the Nextflow parameter <cite>-with-singularity</cite> wit
 <span class="w">   </span><span class="n">cluster</span><span class="w"> </span><span class="o">{</span>
 <span class="w">     </span><span class="n">process</span><span class="w"> </span><span class="o">{</span>
 <span class="w">        </span><span class="n">containerOptions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">workflow</span><span class="o">.</span><span class="na">containerEngine</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;docker&quot;</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s1">&#39;-u $(id -u):$(id -g)&#39;</span><span class="o">:</span><span class="w"> </span><span class="kc">null</span><span class="o">}</span>
-<span class="w">        </span><span class="n">executor</span><span class="o">=</span><span class="s2">&quot;SGE&quot;</span>
-<span class="w">        </span><span class="n">queue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;smallcpus&quot;</span>
+<span class="w">        </span><span class="n">executor</span><span class="o">=</span><span class="s2">&quot;slurm&quot;</span>
 
+<span class="w">        </span><span class="n">queue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;medium&quot;</span>
 <span class="w">        </span><span class="n">memory</span><span class="o">=</span><span class="s1">&#39;1G&#39;</span>
 <span class="w">        </span><span class="n">cpus</span><span class="o">=</span><span class="s1">&#39;1&#39;</span>
 <span class="w">        </span><span class="n">time</span><span class="o">=</span><span class="s1">&#39;6h&#39;</span>
 
 <span class="w">        </span><span class="nl">withLabel:</span><span class="w"> </span><span class="s1">&#39;twocpus&#39;</span><span class="w"> </span><span class="o">{</span>
-<span class="w">            </span><span class="n">queue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;bigcpus&quot;</span>
+<span class="w">            </span><span class="n">queue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;long&quot;</span>
 <span class="w">            </span><span class="n">memory</span><span class="o">=</span><span class="s1">&#39;4G&#39;</span>
 <span class="w">            </span><span class="n">cpus</span><span class="o">=</span><span class="s1">&#39;2&#39;</span>
 <span class="w">        </span><span class="o">}</span>

@@ -65,25 +65,38 @@
 <li class="toctree-l3"><a class="reference internal" href="#using-existing-images">Using existing images</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#explore-docker-hub">Explore Docker hub</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#docker-pull-import-image">docker pull: import image</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#biocontainers">Biocontainers</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#docker-images-list-images">docker images: list images</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#docker-run-run-image-i-e-start-a-container">docker run: run image, i.e. start a container</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#docker-ps-check-containers-status">docker ps: check containers status</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#docker-rm-docker-rmi-clean-up">docker rm, docker rmi: clean up!</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#additional-docker-commands">Additional docker commands</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#volumes">Volumes</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#major-clean">Major clean</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#volumes">Volumes</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#build-images">Build images</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#os-commands-in-image-building">OS commands in image building</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#update-and-upgrade-packages">Update and upgrade packages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#search-and-install-packages">Search and install packages</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#building-recipes">Building recipes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#basic-instructions">Basic instructions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#docker-build">docker build</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#more-instructions">More instructions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#docker-tag">docker tag</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#more-complex-examples">More complex examples</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#additional-docker-commands">Additional docker commands</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#major-clean">Major clean</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#singularity">Singularity</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#singularity-architecture">Singularity architecture</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#container-registries">Container registries</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#docker-hub">Docker hub</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id1">Biocontainers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biocontainers">Biocontainers</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#running-and-executing-containers">Running and executing containers</a><ul>
@@ -288,20 +301,6 @@
 </pre></div>
 </div>
 </section>
-<section id="biocontainers">
-<h4>Biocontainers<a class="headerlink" href="#biocontainers" title="Link to this heading"></a></h4>
-<p><a class="reference external" href="https://biocontainers.pro/">https://biocontainers.pro/</a></p>
-<p>Specific directory of Bioinformatics related entries</p>
-<ul class="simple">
-<li><p>Entries in <a class="reference external" href="https://hub.docker.com/u/biocontainers">Docker hub</a> and/or <a class="reference external" href="https://quay.io">Quay.io</a> (RedHat registry)</p></li>
-<li><p>Normally created from <a class="reference external" href="https://bioconda.github.io">Bioconda</a></p></li>
-</ul>
-<p>Example: <strong>FastQC</strong></p>
-<p><a class="reference external" href="https://biocontainers.pro/#/tools/fastqc">https://biocontainers.pro/#/tools/fastqc</a></p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker pull biocontainers/fastqc:v0.11.9_cv7</span>
-</pre></div>
-</div>
-</section>
 </section>
 <section id="docker-images-list-images">
 <h3>docker images: list images<a class="headerlink" href="#docker-images-list-images" title="Link to this heading"></a></h3>
@@ -356,8 +355,217 @@
 </pre></div>
 </div>
 </section>
+<section id="volumes">
+<h3>Volumes<a class="headerlink" href="#volumes" title="Link to this heading"></a></h3>
+<p>Docker containers are fully isolated. It is necessary to mount volumes in order to handle input/output files.</p>
+<p>Syntax: <strong>--volume/-v</strong> <em>host:container</em></p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">mkdir data</span>
+<span class="gp"># </span>We<span class="w"> </span>can<span class="w"> </span>also<span class="w"> </span>copy<span class="w"> </span>the<span class="w"> </span>FASTQ<span class="w"> </span>we<span class="w"> </span>used<span class="w"> </span><span class="k">in</span><span class="w"> </span>data
+<span class="go">docker run --volume $(pwd)/data:/scratch --name fastqc_container biocontainers/fastqc:v0.11.9_cv7 fastqc /scratch/B7_input_s_chr19.fastq.gz</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="build-images">
+<h2>Build images<a class="headerlink" href="#build-images" title="Link to this heading"></a></h2>
+<section id="os-commands-in-image-building">
+<h3>OS commands in image building<a class="headerlink" href="#os-commands-in-image-building" title="Link to this heading"></a></h3>
+<p>Depending on the underlying OS, there are different ways to build images.</p>
+<p>Know your base system and their packages. Popular ones:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://packages.debian.org">Debian</a></p></li>
+<li><p><a class="reference external" href="https://centos.pkgs.org/">CentOS</a></p></li>
+<li><p><a class="reference external" href="https://pkgs.alpinelinux.org/packages">Alpine</a></p></li>
+<li><p>Conda. <a class="reference external" href="https://anaconda.org/anaconda/repo">Anaconda</a>, <a class="reference external" href="https://conda-forge.org/feedstocks/">Conda-forge</a>, <a class="reference external" href="https://anaconda.org/bioconda/repo">Bioconda</a>, etc.</p></li>
+</ul>
+<section id="update-and-upgrade-packages">
+<h4>Update and upgrade packages<a class="headerlink" href="#update-and-upgrade-packages" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p>In <strong>Ubuntu</strong>:</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span> <span class="o">&amp;&amp;</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">upgrade</span> <span class="o">-</span><span class="n">y</span>
+</pre></div>
+</div>
+<p>In <strong>CentOS</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yum</span> <span class="n">check</span><span class="o">-</span><span class="n">update</span> <span class="o">&amp;&amp;</span> <span class="n">yum</span> <span class="n">update</span> <span class="o">-</span><span class="n">y</span>
+</pre></div>
+</div>
+</section>
+<section id="search-and-install-packages">
+<h4>Search and install packages<a class="headerlink" href="#search-and-install-packages" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p>In <strong>Ubuntu</strong>:</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apt</span> <span class="n">search</span> <span class="n">libxml2</span>
+<span class="n">apt</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">libxml2</span><span class="o">-</span><span class="n">dev</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>In <strong>CentOS</strong>:</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yum</span> <span class="n">search</span> <span class="n">libxml2</span>
+<span class="n">yum</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">libxml2</span><span class="o">-</span><span class="n">devel</span><span class="o">.</span><span class="n">x86_64</span>
+</pre></div>
+</div>
+<p>Note the <strong>-y</strong> option that we set for updating and for installing.&lt;br&gt;
+It is an important option in the context of Docker: it means that you <em>answer yes to all questions</em> regarding installation.</p>
+</section>
+</section>
+<section id="building-recipes">
+<h3>Building recipes<a class="headerlink" href="#building-recipes" title="Link to this heading"></a></h3>
+<p>All commands should be saved in a text file, named by default <strong>Dockerfile</strong>.</p>
+<section id="basic-instructions">
+<h4>Basic instructions<a class="headerlink" href="#basic-instructions" title="Link to this heading"></a></h4>
+<p>Each row in the recipe corresponds to a <strong>layer</strong> of the final image.</p>
+<p><strong>FROM</strong>: parent image. Typically, an operating system. The <strong>base layer</strong>.</p>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">FROM</span><span class="w"> </span><span class="s">ubuntu:22.04</span>
+</pre></div>
+</div>
+<p><strong>RUN</strong>: the command to execute inside the image filesystem.</p>
+<p>Think about it this way: every <strong>RUN</strong> line is essentially what you would run to install programs on a freshly installed Ubuntu OS.</p>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">RUN</span><span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>wget
+</pre></div>
+</div>
+<p>A basic recipe:</p>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">FROM</span><span class="w"> </span><span class="s">ubuntu:22.04</span>
+
+<span class="k">RUN</span><span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>apt<span class="w"> </span>-y<span class="w"> </span>upgrade
+<span class="k">RUN</span><span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>wget
+</pre></div>
+</div>
+</section>
+<section id="docker-build">
+<h4>docker build<a class="headerlink" href="#docker-build" title="Link to this heading"></a></h4>
+<p>Implicitely looks for a <strong>Dockerfile</strong> file in the current directory:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker build .</span>
+</pre></div>
+</div>
+<p>Same as:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker build --file Dockerfile .</span>
+</pre></div>
+</div>
+<p>Syntax: <strong>--file / -f</strong></p>
+<p><strong>.</strong> stands for the context (in this case, current directory) of the build process. This makes sense if copying files from filesystem, for instance. <strong>IMPORTANT</strong>: Avoid contexts (directories) overpopulated with files (even if not actually used in the recipe).</p>
+<p>You can define a specific name for the image during the build process.</p>
+<p>Syntax: <strong>-t</strong> <em>imagename:tag</em>. If not defined <code class="docutils literal notranslate"><span class="pre">`:tag`</span></code> default is latest.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker build -t mytestimage .</span>
+<span class="gp"># </span>Same<span class="w"> </span>as:
+<span class="go">docker build -t mytestimage:latest .</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>IMPORTANT: Avoid contexts (directories) over-populated with files (even if not actually used in the recipe).</p></li>
+</ul>
+<p>In order to avoid that some directories or files are inspected or included (e.g, with COPY command in Dockerfile), you can use .dockerignore file to specify which paths should be avoided. More information at: <a class="reference external" href="https://codefresh.io/docker-tutorial/not-ignore-dockerignore-2/">https://codefresh.io/docker-tutorial/not-ignore-dockerignore-2/</a></p>
+<p>The last line of installation should be <strong>Successfully built …</strong>: then you are good to go.</p>
+<p>Check with <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">images</span></code> that you see the newly built image in the list…</p>
+<p>Then let’s check the ID of the image and run it!</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker images</span>
+
+<span class="go">docker run f9f41698e2f8</span>
+<span class="go">docker run mytestimage</span>
+</pre></div>
+</div>
+</section>
+<section id="more-instructions">
+<h4>More instructions<a class="headerlink" href="#more-instructions" title="Link to this heading"></a></h4>
+<p><strong>WORKDIR</strong>: all subsequent actions will be executed in that working directory</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">WORKDIR</span> <span class="o">~</span>
+</pre></div>
+</div>
+<p><strong>ADD, COPY</strong>: add files to the image filesystem</p>
+<p>Difference between ADD and COPY explained <a class="reference external" href="https://stackoverflow.com/questions/24958140/what-is-the-difference-between-the-copy-and-add-commands-in-a-dockerfile">here</a> and <a class="reference external" href="https://nickjanetakis.com/blog/docker-tip-2-the-difference-between-copy-and-add-in-a-dockerile">here</a></p>
+<p><strong>COPY</strong>: lets you copy a local file or directory from your host (the machine from which you are building the image)</p>
+<p><strong>ADD</strong>: same, but ADD works also for URLs, and for .tar archives that will be automatically extracted upon being copied.</p>
+<p>If we have a file, let’s say <code class="docutils literal notranslate"><span class="pre">`example.jpg`</span></code>, we can copy it.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># COPY source destination</span>
+<span class="n">COPY</span> <span class="n">example</span><span class="o">.</span><span class="n">jpg</span> <span class="o">.</span>
+</pre></div>
+</div>
+<p>A more sophisticated case:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FROM</span> <span class="n">ubuntu</span><span class="p">:</span><span class="mf">22.04</span>
+
+<span class="n">RUN</span> <span class="n">apt</span> <span class="n">update</span> <span class="o">&amp;&amp;</span> <span class="n">apt</span> <span class="o">-</span><span class="n">y</span> <span class="n">upgrade</span>
+<span class="n">RUN</span> <span class="n">apt</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">wget</span>
+
+<span class="n">RUN</span> <span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="o">/</span><span class="n">data</span>
+
+<span class="n">WORKDIR</span> <span class="o">/</span><span class="n">data</span>
+
+<span class="n">COPY</span> <span class="n">example</span><span class="o">.</span><span class="n">jpg</span> <span class="o">.</span>
+</pre></div>
+</div>
+<p><strong>ENV, ARG</strong>: run and build environment variables</p>
+<p>Difference between ARG and ENV explained <a class="reference external" href="https://vsupalov.com/docker-arg-vs-env/">here</a>.</p>
+<ul class="simple">
+<li><p><strong>ARG</strong> values: available only while the image is built.</p></li>
+<li><p><strong>ENV</strong> values: available during the image build process but also for the future running containers.
+* It can be checked in a resulting running container by running <code class="docutils literal notranslate"><span class="pre">env</span></code>.</p></li>
+</ul>
+<p>In the case below <strong>UbuntuVersion</strong> argument is provided with a default value.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ARG UbuntuVersion=22.04
+
+FROM ubuntu:${UbuntuVersion}
+</pre></div>
+</div>
+<p>Override the value for <strong>UbuntuVersion</strong> as you build the image with –build-arg:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">build</span> <span class="o">--</span><span class="n">build</span><span class="o">-</span><span class="n">arg</span> <span class="n">UbuntuVersion</span><span class="o">=</span><span class="mf">20.04</span> <span class="o">.</span>
+</pre></div>
+</div>
+<p>We try a simple example with ENV</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>FROM ubuntu:22.04
+
+ENV PLANET=&quot;Earth&quot;
+
+RUN echo ${PLANET}
+</pre></div>
+</div>
+<p>Enter in the container interactively and check variable <code class="docutils literal notranslate"><span class="pre">${PLANET}</span></code></p>
+<p>You can pass variable through commandline as well (with <code class="docutils literal notranslate"><span class="pre">--env</span></code>/<code class="docutils literal notranslate"><span class="pre">-e</span></code>) during running process:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker run -ti --env PLANET=Mars test</span>
+</pre></div>
+</div>
+<p>Try to replace the examples above of <strong>ENV</strong> with <strong>ARG</strong> and see what happens.</p>
+<p><strong>CMD, ENTRYPOINT</strong>: command to execute when generated container starts</p>
+<p>The ENTRYPOINT specifies a command that will always be executed when the container starts. The CMD specifies arguments that will be fed to the ENTRYPOINT</p>
+<p>In the example below, when the container is run without an argument, it will execute <cite>echo “hello world”</cite>.
+If it is run with the argument <strong>hello moon</strong> it will execute <cite>echo “hello moon”</cite></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FROM</span> <span class="n">ubuntu</span><span class="p">:</span><span class="mf">22.04</span>
+<span class="n">ENTRYPOINT</span> <span class="p">[</span><span class="s2">&quot;/bin/echo&quot;</span><span class="p">]</span>
+<span class="n">CMD</span> <span class="p">[</span><span class="s2">&quot;hello world&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>A more complex recipe (save it in a text file named <strong>Dockerfile</strong>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FROM</span> <span class="n">ubuntu</span><span class="p">:</span><span class="mf">22.04</span>
+
+<span class="n">WORKDIR</span> <span class="o">~</span>
+
+<span class="n">RUN</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span> <span class="o">&amp;&amp;</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="o">-</span><span class="n">y</span> <span class="n">upgrade</span>
+<span class="n">RUN</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">wget</span>
+
+<span class="n">ENTRYPOINT</span> <span class="p">[</span><span class="s2">&quot;/usr/bin/wget&quot;</span><span class="p">]</span>
+<span class="n">CMD</span> <span class="p">[</span><span class="s2">&quot;https://cdn.wp.nginx.com/wp-content/uploads/2016/07/docker-swarm-hero2.png&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker run f9f41698e2f8 https://cdn-images-1.medium.com/max/1600/1*_NQN6_YnxS29m8vFzWYlEg.png</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="docker-tag">
+<h3>docker tag<a class="headerlink" href="#docker-tag" title="Link to this heading"></a></h3>
+<p>To tag a local image with ID “e23aaea5dff1” into the “ubuntu_wget” image name repository with version “1.0”:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker tag e23aaea5dff1 ubuntu_wget:1.0</span>
+</pre></div>
+</div>
+</section>
+<section id="more-complex-examples">
+<h3>More complex examples<a class="headerlink" href="#more-complex-examples" title="Link to this heading"></a></h3>
+<p>Check in <code class="docutils literal notranslate"><span class="pre">containers/alba</span> <span class="pre">directory</span></code></p>
+</section>
+</section>
 <section id="additional-docker-commands">
-<h3>Additional docker commands<a class="headerlink" href="#additional-docker-commands" title="Link to this heading"></a></h3>
+<h2>Additional docker commands<a class="headerlink" href="#additional-docker-commands" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p><cite>docker commit</cite>: Turn a container into an image</p></li>
 <li><p><cite>docker tag</cite>: Tag an image</p></li>
@@ -371,17 +579,8 @@
 <li><p>Reference: <a class="reference external" href="https://www.baeldung.com/ops/docker-save-export">https://www.baeldung.com/ops/docker-save-export</a></p></li>
 </ul>
 </section>
-<section id="volumes">
-<h3>Volumes<a class="headerlink" href="#volumes" title="Link to this heading"></a></h3>
-<p>Docker containers are fully isolated. It is necessary to mount volumes in order to handle input/output files.</p>
-<p>Syntax: <strong>--volume/-v</strong> <em>host:container</em></p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">mkdir data</span>
-<span class="gp"># </span>We<span class="w"> </span>can<span class="w"> </span>also<span class="w"> </span>copy<span class="w"> </span>the<span class="w"> </span>FASTQ<span class="w"> </span>we<span class="w"> </span>used<span class="w"> </span><span class="k">in</span><span class="w"> </span>data
-<span class="go">docker run --volume $(pwd)/data:/scratch --name fastqc_container biocontainers/fastqc:v0.11.9_cv7 fastqc /scratch/B7_input_s_chr19.fastq.gz</span>
-</pre></div>
-</div>
 <section id="major-clean">
-<h4>Major clean<a class="headerlink" href="#major-clean" title="Link to this heading"></a></h4>
+<h2>Major clean<a class="headerlink" href="#major-clean" title="Link to this heading"></a></h2>
 <p>Check used space</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker system df</span>
 </pre></div>
@@ -397,8 +596,6 @@
 <ul class="simple">
 <li><p>Reference: <a class="reference external" href="https://www.digitalocean.com/community/tutorials/how-to-remove-docker-images-containers-and-volumes">https://www.digitalocean.com/community/tutorials/how-to-remove-docker-images-containers-and-volumes</a></p></li>
 </ul>
-</section>
-</section>
 </section>
 <section id="singularity">
 <h2>Singularity<a class="headerlink" href="#singularity" title="Link to this heading"></a></h2>
@@ -450,11 +647,11 @@
 <p><strong>Trivia</strong></p>
 <p>Nowadays, there may be some confusion since there are two projects:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="https://github.com/apptainer/singularity">Apptainer Singularity</a></p></li>
+<li><p><a class="reference external" href="https://apptainer.org">Apptainer</a></p></li>
 <li><p><a class="reference external" href="https://sylabs.io/singularity/">Sylabs Singularity</a></p></li>
 </ul>
 <p>They “forked” in 2021. So far they share most of the codebase, but eventually this could be different, and software might have different functionality.</p>
-<p>The former is already “End Of Life” and its development continues named as <a class="reference external" href="http://apptainer.org/">Apptainer</a>, under the support of the Linux Foundation.</p>
+<p>In the command-line you can have <cite>apptainer</cite> installed but <cite>singularity</cite> is available as an alias of the former.</p>
 </section>
 <section id="container-registries">
 <h3>Container registries<a class="headerlink" href="#container-registries" title="Link to this heading"></a></h3>
@@ -472,8 +669,8 @@
 </pre></div>
 </div>
 </section>
-<section id="id1">
-<h4>Biocontainers<a class="headerlink" href="#id1" title="Link to this heading"></a></h4>
+<section id="biocontainers">
+<h4>Biocontainers<a class="headerlink" href="#biocontainers" title="Link to this heading"></a></h4>
 <ul class="simple">
 <li><p><a class="reference external" href="https://biocontainers.pro">Biocontainers</a></p></li>
 </ul>
