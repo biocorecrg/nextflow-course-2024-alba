@@ -496,37 +496,6 @@ It is an important option in the context of Docker: it means that you <em>answer
 <span class="n">COPY</span> <span class="n">example</span><span class="o">.</span><span class="n">jpg</span> <span class="o">.</span>
 </pre></div>
 </div>
-<p><strong>ENV, ARG</strong>: run and build environment variables</p>
-<p>Difference between ARG and ENV explained <a class="reference external" href="https://vsupalov.com/docker-arg-vs-env/">here</a>.</p>
-<ul class="simple">
-<li><p><strong>ARG</strong> values: available only while the image is built.</p></li>
-<li><p><strong>ENV</strong> values: available during the image build process but also for the future running containers.
-* It can be checked in a resulting running container by running <code class="docutils literal notranslate"><span class="pre">env</span></code>.</p></li>
-</ul>
-<p>In the case below <strong>UbuntuVersion</strong> argument is provided with a default value.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ARG UbuntuVersion=22.04
-
-FROM ubuntu:${UbuntuVersion}
-</pre></div>
-</div>
-<p>Override the value for <strong>UbuntuVersion</strong> as you build the image with –build-arg:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">build</span> <span class="o">--</span><span class="n">build</span><span class="o">-</span><span class="n">arg</span> <span class="n">UbuntuVersion</span><span class="o">=</span><span class="mf">20.04</span> <span class="o">.</span>
-</pre></div>
-</div>
-<p>We try a simple example with ENV</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>FROM ubuntu:22.04
-
-ENV PLANET=&quot;Earth&quot;
-
-RUN echo ${PLANET}
-</pre></div>
-</div>
-<p>Enter in the container interactively and check variable <code class="docutils literal notranslate"><span class="pre">${PLANET}</span></code></p>
-<p>You can pass variable through commandline as well (with <code class="docutils literal notranslate"><span class="pre">--env</span></code>/<code class="docutils literal notranslate"><span class="pre">-e</span></code>) during running process:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker run -ti --env PLANET=Mars test</span>
-</pre></div>
-</div>
-<p>Try to replace the examples above of <strong>ENV</strong> with <strong>ARG</strong> and see what happens.</p>
 <p><strong>CMD, ENTRYPOINT</strong>: command to execute when generated container starts</p>
 <p>The ENTRYPOINT specifies a command that will always be executed when the container starts. The CMD specifies arguments that will be fed to the ENTRYPOINT</p>
 <p>In the example below, when the container is run without an argument, it will execute <cite>echo “hello world”</cite>.
