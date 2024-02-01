@@ -150,8 +150,8 @@ This can be done using the Nextflow parameter <cite>-with-singularity</cite> wit
 <span class="go">...</span>
 </pre></div>
 </div>
-<p>If you have to submit a job to a HPC you need to use the corresponding program, such as <strong>qsub</strong> if you have a Sun Grid Engine or <strong>sbatch</strong> if you have Slurm. Here an example using SGE:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">qsub .command.run</span>
+<p>If you have to submit a job to a HPC you need to use the corresponding program, such as <strong>qsub</strong> if you have a Sun Grid Engine or <strong>sbatch</strong> if you have Slurm. Here an example using Slurm:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">sbatch .command.run</span>
 </pre></div>
 </div>
 </section>
@@ -455,13 +455,13 @@ Nextflow will handle the dependencies between the input/output and the paralleli
 
 <span class="n">workflow</span><span class="w"> </span><span class="o">{</span>
 
-<span class="w">	</span><span class="c1">// HERE WE DO DENOISING </span>
-<span class="w">	</span><span class="n">denois_out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">denoise</span><span class="o">(</span><span class="n">images</span><span class="o">)</span>
-<span class="w">	</span><span class="c1">// HERE WE JOIN DENOISE OUTPUT WITH ORIGINAL IMAGES JUST FOR PRINTING PURPOSES</span>
-<span class="w">        </span><span class="n">images</span><span class="o">.</span><span class="na">join</span><span class="o">(</span><span class="n">denois_out</span><span class="o">).</span><span class="na">view</span><span class="o">()</span>
-<span class="w">        </span><span class="c1">// HERE WE RUN NORMALIZE </span>
-<span class="w">	</span><span class="n">normalized_out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="o">(</span><span class="n">images</span><span class="o">.</span><span class="na">join</span><span class="o">(</span><span class="n">denois_out</span><span class="o">))</span>
-<span class="w">	</span><span class="n">aggregate</span><span class="o">(</span><span class="n">normalized_out</span><span class="o">.</span><span class="na">collect</span><span class="o">())</span>
+<span class="w">    </span><span class="c1">// HERE WE DO DENOISING </span>
+<span class="w">    </span><span class="n">denois_out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">denoise</span><span class="o">(</span><span class="n">images</span><span class="o">)</span>
+<span class="w">    </span><span class="c1">// HERE WE JOIN DENOISE OUTPUT WITH ORIGINAL IMAGES JUST FOR PRINTING PURPOSES</span>
+<span class="w">    </span><span class="n">images</span><span class="o">.</span><span class="na">join</span><span class="o">(</span><span class="n">denois_out</span><span class="o">).</span><span class="na">view</span><span class="o">()</span>
+<span class="w">    </span><span class="c1">// HERE WE RUN NORMALIZE </span>
+<span class="w">    </span><span class="n">normalized_out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalize</span><span class="o">(</span><span class="n">images</span><span class="o">.</span><span class="na">join</span><span class="o">(</span><span class="n">denois_out</span><span class="o">))</span>
+<span class="w">    </span><span class="n">aggregate</span><span class="o">(</span><span class="n">normalized_out</span><span class="o">.</span><span class="na">collect</span><span class="o">())</span>
 <span class="o">}</span>
 
 
