@@ -72,6 +72,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#docker-ps-check-containers-status">docker ps: check containers status</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#docker-rm-docker-rmi-clean-up">docker rm, docker rmi: clean up!</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#volumes">Volumes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#docker-run-user">docker run –user</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#build-images">Build images</a><ul>
@@ -104,6 +105,13 @@
 <li class="toctree-l4"><a class="reference internal" href="#singularity-exec">Singularity exec</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#environment-control">Environment control</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#exercise">Exercise</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#singularity-tips">Singularity tips</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fakeroot">Fakeroot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#singularity-cache-directory">Singularity cache directory</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#global-singularity-configuration">Global singularity configuration</a></li>
 </ul>
 </li>
 </ul>
@@ -240,7 +248,7 @@
 <li><p><a class="reference external" href="https://www.docker.com/products/container-runtime">Docker Community Edition</a>.</p></li>
 <li><p>Docker Enterprise Edition.</p></li>
 </ul>
-<p>There is an increasing number of alternative container technologies and providers. Many of them are actually based on software components originally from the Docker stack, and they normally try to address some specific use cases or weakpoints. As an example, <strong>Singularity</strong>, that we introduce later in this course, is focused on HPC environments. Another case, <strong>Podman</strong>, keeps a high functional compatibility with Docker but with a different focus on technology (not keeping a daemon) and permissions.</p>
+<p>There is an increasing number of alternative container technologies and providers. Many of them are actually based on software components originally from the Docker stack, and they normally try to address some specific use cases or weak points. As an example, <strong>Singularity</strong>, that we introduce later in this course, is focused on HPC environments. Another case, <strong>Podman</strong>, keeps a high functional compatibility with Docker but with a different focus on technology (not keeping a daemon) and permissions.</p>
 </section>
 <section id="docker-components">
 <h3>Docker components<a class="headerlink" href="#docker-components" title="Link to this heading"></a></h3>
@@ -365,6 +373,14 @@
 </pre></div>
 </div>
 </section>
+<section id="docker-run-user">
+<h3>docker run –user<a class="headerlink" href="#docker-run-user" title="Link to this heading"></a></h3>
+<p>It is possible to run certain containers with a specific user, appending <code class="docutils literal notranslate"><span class="pre">`run</span> <span class="pre">\--user`</span></code>.</p>
+<p>A convenient command would be:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker run --user $(id -u):$(id -g) --volume $(pwd)/data:/scratch --name user_test biocontainers/fastqc:v0.11.9_cv7 touch /scratch/userfile</span>
+</pre></div>
+</div>
+</section>
 </section>
 <section id="build-images">
 <h2>Build images<a class="headerlink" href="#build-images" title="Link to this heading"></a></h2>
@@ -448,22 +464,25 @@ It is an important option in the context of Docker: it means that you <em>answer
 <p><strong>.</strong> stands for the context (in this case, current directory) of the build process. This makes sense if copying files from filesystem, for instance. <strong>IMPORTANT</strong>: Avoid contexts (directories) overpopulated with files (even if not actually used in the recipe).</p>
 <p>You can define a specific name for the image during the build process.</p>
 <p>Syntax: <strong>-t</strong> <em>imagename:tag</em>. If not defined <code class="docutils literal notranslate"><span class="pre">`:tag`</span></code> default is latest.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker build -t mytestimage .</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker build -t mytestimage-$USER .</span>
 <span class="gp"># </span>Same<span class="w"> </span>as:
-<span class="go">docker build -t mytestimage:latest .</span>
+<span class="go">docker build -t mytestimage-$USER:latest .</span>
 </pre></div>
 </div>
 <ul class="simple">
 <li><p>IMPORTANT: Avoid contexts (directories) over-populated with files (even if not actually used in the recipe).</p></li>
 </ul>
 <p>In order to avoid that some directories or files are inspected or included (e.g, with COPY command in Dockerfile), you can use .dockerignore file to specify which paths should be avoided. More information at: <a class="reference external" href="https://codefresh.io/docker-tutorial/not-ignore-dockerignore-2/">https://codefresh.io/docker-tutorial/not-ignore-dockerignore-2/</a></p>
+<ul class="simple">
+<li><p>NOTE: We use $USER bash env variable for avoiding conflicts between different users in the same machine. This is a common practice in HPC environments.</p></li>
+</ul>
 <p>The last line of installation should be <strong>Successfully built …</strong>: then you are good to go.</p>
 <p>Check with <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">images</span></code> that you see the newly built image in the list…</p>
 <p>Then let’s check the ID of the image and run it!</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">docker images</span>
 
 <span class="go">docker run f9f41698e2f8</span>
-<span class="go">docker run mytestimage</span>
+<span class="go">docker run mytestimage-$USER</span>
 </pre></div>
 </div>
 </section>
@@ -537,7 +556,6 @@ If it is run with the argument <strong>hello moon</strong> it will execute <cite
 <h2>Additional docker commands<a class="headerlink" href="#additional-docker-commands" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p><cite>docker commit</cite>: Turn a container into an image</p></li>
-<li><p><cite>docker tag</cite>: Tag an image</p></li>
 <li><p><cite>docker save</cite>: Save an image to a tar archive</p></li>
 <li><p><cite>docker load</cite>: Load an image from a tar archive</p></li>
 <li><p><cite>docker export</cite>: Export a container’s filesystem as a tar archive (little used)</p></li>
@@ -730,6 +748,40 @@ This is common in HPC environments.</p>
 </pre></div>
 </div>
 </details></section>
+</section>
+<section id="singularity-tips">
+<h3>Singularity tips<a class="headerlink" href="#singularity-tips" title="Link to this heading"></a></h3>
+<section id="troubleshooting">
+<h4>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h4>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">singularity --help</span>
+</pre></div>
+</div>
+</section>
+<section id="fakeroot">
+<h4>Fakeroot<a class="headerlink" href="#fakeroot" title="Link to this heading"></a></h4>
+<p>Singularity permissions are an evolving field. If you don’t have access to <code class="docutils literal notranslate"><span class="pre">sudo</span></code>, it might be worth considering using <strong>–fakeroot/-f</strong> parameter.</p>
+<ul class="simple">
+<li><p>More details at <a class="reference external" href="https://apptainer.org/docs/user/main/fakeroot.html">https://apptainer.org/docs/user/main/fakeroot.html</a></p></li>
+</ul>
+</section>
+<section id="singularity-cache-directory">
+<h4>Singularity cache directory<a class="headerlink" href="#singularity-cache-directory" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$HOME/.singularity
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>It stores cached images from registries, instances, etc.</p></li>
+<li><p>If problems may be a good place to clean. When running <code class="docutils literal notranslate"><span class="pre">sudo</span></code>, $HOME is /root.</p></li>
+</ul>
+</section>
+<section id="global-singularity-configuration">
+<h4>Global singularity configuration<a class="headerlink" href="#global-singularity-configuration" title="Link to this heading"></a></h4>
+<p>Normally at <code class="docutils literal notranslate"><span class="pre">/etc/singularity/singularity.conf</span></code> or similar (e.g., preceded by <code class="docutils literal notranslate"><span class="pre">/usr/local/</span></code>)</p>
+<ul class="simple">
+<li><p>It can only be modified by users with administration permissions</p></li>
+<li><p>Worth noting <code class="docutils literal notranslate"><span class="pre">bind</span> <span class="pre">path</span></code> lines, which point default mounted directories in containers</p></li>
+</ul>
+</section>
 </section>
 </section>
 </section>
