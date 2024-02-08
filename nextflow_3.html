@@ -982,7 +982,7 @@ This can be done using the Nextflow parameter <cite>-with-singularity</cite> wit
 </pre></div>
 </div>
 <p>As you can see, we explicitly indicated the <strong>local</strong> executor. By definition, the local executor is a default executor if the pipeline is run without specifying a profile.</p>
-<p>The second profile is for running the pipeline on the <strong>cluster</strong>; here in particular for the cluster supporting the Sun Grid Engine queuing system:</p>
+<p>The second profile is for running the pipeline on the <strong>cluster</strong>; here in particular for the cluster supporting the SLURM Workload Manager queuing system:</p>
 <div class="highlight-groovy notranslate"><div class="highlight"><pre><span></span><span class="w">   </span><span class="n">cluster</span><span class="w"> </span><span class="o">{</span>
 <span class="w">     </span><span class="n">process</span><span class="w"> </span><span class="o">{</span>
 <span class="w">        </span><span class="n">containerOptions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">workflow</span><span class="o">.</span><span class="na">containerEngine</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;docker&quot;</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s1">&#39;-u $(id -u):$(id -g)&#39;</span><span class="o">:</span><span class="w"> </span><span class="kc">null</span><span class="o">}</span>
@@ -1002,7 +1002,18 @@ This can be done using the Nextflow parameter <cite>-with-singularity</cite> wit
 <span class="w">   </span><span class="o">}</span>
 </pre></div>
 </div>
-<p>This profile indicates that the system uses <strong>Sun Grid Engine</strong> as a job scheduler and that we have different queues for small jobs and more intensive ones.</p>
+<p>This profile indicates that the system uses <strong>SLURM</strong> as a job scheduler and that we have different queues for small jobs and more intensive ones.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>IMPORTANT: You need to have either Docker or Singularity installed and running in your computing nodes to run the pipeline. In some HPC you might need to “load” the programs using the modules. For this we advice to add this command inside your <strong>.bash_profile</strong> file.</p>
+</div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">vi $HOME/.bash_profile</span>
+
+<span class="gp">#</span>ADD<span class="w"> </span>THIS
+
+<span class="go">module load apptainer</span>
+</pre></div>
+</div>
 </section>
 <section id="deployment-in-the-aws-cloud">
 <h2>Deployment in the AWS cloud<a class="headerlink" href="#deployment-in-the-aws-cloud" title="Link to this heading"></a></h2>
